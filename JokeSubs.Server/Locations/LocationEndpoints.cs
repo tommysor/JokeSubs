@@ -1,0 +1,58 @@
+using Microsoft.AspNetCore.Http.HttpResults;
+
+namespace JokeSubs.Server.Locations;
+
+public static class LocationEndpoints
+{
+    public static IEndpointRouteBuilder MapLocationEndpoints(this IEndpointRouteBuilder app)
+    {
+        var group = app.MapGroup("/api/locations")
+            .WithTags("Locations");
+
+        group.MapGet("", (ILocationStore store) => TypedResults.Ok(store.GetAll()))
+            .WithName("GetLocations");
+
+        group.MapPost("", Results<Created<Location>, ValidationProblem> (CreateLocationRequest request, ILocationStore store) =>
+        {
+            var errors = ValidateRequest(request, store);
+
+            if (errors.Count > 0)
+            {
+                return TypedResults.ValidationProblem(errors);
+            }
+
+            var location = store.Add(request);
+            return TypedResults.Created($"/api/locations/{Uri.EscapeDataString(location.Id)}", location);
+        })
+        .WithName("CreateLocation");
+
+        return app;
+    }
+
+    private static Dictionary<string, string[]> ValidateRequest(CreateLocationRequest request, ILocationStore store)
+    {
+        var errors = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+        var trimmedId = request.Id?.Trim() ?? string.Empty;
+        var trimmedName = request.Name?.Trim() ?? string.Empty;
+
+        if (trimmedId.Length == 0)
+        {
+            errors[nameof(request.Id)] = ["Id is required."];
+        }
+        else if (trimmedId.Length < 4)
+        {
+            errors[nameof(request.Id)] = ["Id must be at least 4 characters long."];
+        }
+        else if (store.Exists(trimmedId))
+        {
+            errors[nameof(request.Id)] = ["Id must be unique."];
+        }
+
+        if (trimmedName.Length == 0)
+        {
+            errors[nameof(request.Name)] = ["Name is required."];
+        }
+
+        return errors;
+    }
+}
