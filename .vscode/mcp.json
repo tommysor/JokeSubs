@@ -2,10 +2,17 @@
   "servers": {
     "aspire": {
       "type": "stdio",
-      "command": "aspire",
+      "command": "/workspaces/JokeSubs/.devcontainer/scripts/mcp-aspire.sh",
       "args": [
-        "mcp",
-        "start"
+      ]
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "/workspaces/JokeSubs/.devcontainer/scripts/mcp-playwright.sh",
+      "args": [
+        "--headless",
+        "--no-sandbox",
+        "--ignore-https-errors"
       ]
     }
   }
