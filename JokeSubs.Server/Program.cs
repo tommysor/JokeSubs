@@ -1,4 +1,5 @@
 using JokeSubs.Server.Locations;
+using Microsoft.Azure.Cosmos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,7 +8,17 @@ builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
-builder.Services.AddSingleton<ILocationStore, InMemoryLocationStore>();
+
+builder.AddAzureCosmosClient("locations",
+    configureClientOptions: options =>
+    {
+        options.SerializerOptions = new CosmosSerializationOptions
+        {
+            PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
+        };
+    });
+
+builder.Services.AddSingleton<ILocationStore, CosmosLocationStore>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

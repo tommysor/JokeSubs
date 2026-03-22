@@ -9,19 +9,20 @@ public static class LocationEndpoints
         var group = app.MapGroup("/api/locations")
             .WithTags("Locations");
 
-        group.MapGet("", (ILocationStore store) => TypedResults.Ok(store.GetAll()))
+        group.MapGet("", async (ILocationStore store) =>
+            TypedResults.Ok(await store.GetAllAsync()))
             .WithName("GetLocations");
 
-        group.MapPost("", Results<Created<Location>, ValidationProblem> (CreateLocationRequest request, ILocationStore store) =>
+        group.MapPost("", async Task<Results<Created<Location>, ValidationProblem>> (CreateLocationRequest request, ILocationStore store) =>
         {
-            var errors = ValidateRequest(request, store);
+            var errors = await ValidateRequest(request, store);
 
             if (errors.Count > 0)
             {
                 return TypedResults.ValidationProblem(errors);
             }
 
-            var location = store.Add(request);
+            var location = await store.AddAsync(request);
             return TypedResults.Created($"/api/locations/{Uri.EscapeDataString(location.Id)}", location);
         })
         .WithName("CreateLocation");
@@ -29,7 +30,7 @@ public static class LocationEndpoints
         return app;
     }
 
-    private static Dictionary<string, string[]> ValidateRequest(CreateLocationRequest request, ILocationStore store)
+    private static async Task<Dictionary<string, string[]>> ValidateRequest(CreateLocationRequest request, ILocationStore store)
     {
         var errors = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
         var trimmedId = request.Id?.Trim() ?? string.Empty;
@@ -43,7 +44,7 @@ public static class LocationEndpoints
         {
             errors[nameof(request.Id)] = ["Id must be at least 4 characters long."];
         }
-        else if (store.Exists(trimmedId))
+        else if (await store.ExistsAsync(trimmedId))
         {
             errors[nameof(request.Id)] = ["Id must be unique."];
         }

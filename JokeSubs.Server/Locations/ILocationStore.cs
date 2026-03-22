@@ -2,9 +2,9 @@ namespace JokeSubs.Server.Locations;
 
 public interface ILocationStore
 {
-    IReadOnlyList<Location> GetAll();
+    Task<IReadOnlyList<Location>> GetAllAsync();
 
-    bool Exists(string id);
+    Task<bool> ExistsAsync(string id);
 
-    Location Add(CreateLocationRequest request);
+    Task<Location> AddAsync(CreateLocationRequest request);
 }
