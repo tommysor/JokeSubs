@@ -1,5 +1,11 @@
 FROM mcr.microsoft.com/devcontainers/dotnet:10.0
 
+# Configure Docker daemon to disable iptables so that Docker-in-Docker works
+# when the devcontainer is hosted by Podman (which does not expose the iptables
+# NAT table to nested containers).
+RUN mkdir -p /etc/docker && \
+    printf '{\n  "iptables": false\n}\n' > /etc/docker/daemon.json
+
 # Install core utilities needed by MCP wrappers and browser runtime.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
