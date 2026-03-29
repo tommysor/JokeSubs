@@ -2,7 +2,10 @@
 set -euo pipefail
 
 run_playwright_mcp() {
-  local default_args=("--headless" "--no-sandbox")
+  local default_args=("--no-sandbox")
+
+  # Always use the Xvfb display used by noVNC in this dev container.
+  export DISPLAY=":99"
 
   if command -v playwright-mcp >/dev/null 2>&1; then
     exec playwright-mcp "${default_args[@]}" "$@"

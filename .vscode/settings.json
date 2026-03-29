@@ -12,5 +12,16 @@
         "https://learn.microsoft.com": true,
         "https://aspire.dev": true,
         "https://www.nuget.org": true
-    }
+    },
+    "dotnetAcquisitionExtension.existingDotnetPath": [
+        {
+            "extensionId": "ms-dotnettools.csdevkit",
+            "path": "/home/vscode/.dotnet-csharp-host/dotnet"
+        },
+        {
+            "extensionId": "ms-dotnettools.csharp",
+            "path": "/home/vscode/.dotnet-csharp-host/dotnet"
+        }
+    ],
+    "dotnetAcquisitionExtension.allowInvalidPaths": true
 }

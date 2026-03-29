@@ -10,8 +10,6 @@
       "type": "stdio",
       "command": "/workspaces/JokeSubs/.devcontainer/scripts/mcp-playwright.sh",
       "args": [
-        "--headless",
-        "--no-sandbox",
         "--ignore-https-errors"
       ]
     }

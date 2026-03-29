@@ -3,3 +3,4 @@ obj\\Debug
 bin
 node_modules
 dist
+test-results

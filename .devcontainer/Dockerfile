@@ -34,3 +34,12 @@ RUN apt-get update \
         xdg-utils \
     && if apt-cache show libasound2t64 >/dev/null 2>&1; then apt-get install -y --no-install-recommends libasound2t64; else apt-get install -y --no-install-recommends libasound2; fi \
     && rm -rf /var/lib/apt/lists/*
+
+# Install virtual display + VNC + noVNC for headed Playwright browsing.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        xvfb \
+        x11vnc \
+        novnc \
+        websockify \
+    && rm -rf /var/lib/apt/lists/*
