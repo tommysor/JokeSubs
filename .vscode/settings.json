@@ -3,17 +3,17 @@
         "aspire run": true,
         "dotnet build": true,
         "dotnet list": true,
+        "dotnet package search": true,
         "dotnet restore": true,
         "dotnet test": true,
-        "dotnet package search": true,
         "npm run build": true
     },
     "chat.tools.urls.autoApprove": {
+        "https://aspire.dev": true,
         "https://code.visualstudio.com": true,
         "https://github.com/microsoft/*": true,
         "https://github.com/dotnet/*": true,
         "https://learn.microsoft.com": true,
-        "https://aspire.dev": true,
         "https://www.nuget.org": true,
         "https://xunit.net": true
     },
