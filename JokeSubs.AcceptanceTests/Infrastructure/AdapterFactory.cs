@@ -2,7 +2,7 @@ namespace JokeSubs.AcceptanceTests.Infrastructure;
 
 /// <summary>
 /// Factory for creating acceptance test adapters.
-/// Supports creating API and UI adapters, and can enumerate all requested adapters for a test.
+/// Supports creating a single API or UI adapter for a test execution.
 /// </summary>
 public class AdapterFactory
 {
@@ -14,22 +14,15 @@ public class AdapterFactory
     }
 
     /// <summary>
-    /// Creates all adapters matching the given kind.
+    /// Creates a single adapter for the given kind.
     /// </summary>
-    public async Task<List<IAcceptanceAdapter>> CreateAdaptersAsync(AdapterKind kind)
+    public async Task<IAcceptanceAdapter> CreateAdapterAsync(AdapterKind kind)
     {
-        var adapters = new List<IAcceptanceAdapter>();
-
-        if (kind.HasFlag(AdapterKind.Api))
+        return kind switch
         {
-            adapters.Add(new Adapters.Api.ApiAcceptanceAdapter(_fixture));
-        }
-
-        if (kind.HasFlag(AdapterKind.Ui))
-        {
-            adapters.Add(await Adapters.Ui.PlaywrightAcceptanceAdapter.CreateAsync(_fixture));
-        }
-
-        return adapters;
+            AdapterKind.Api => new Adapters.Api.ApiAcceptanceAdapter(_fixture),
+            AdapterKind.Ui => await Adapters.Ui.PlaywrightAcceptanceAdapter.CreateAsync(_fixture),
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Only a single adapter kind is supported per test execution.")
+        };
     }
 }

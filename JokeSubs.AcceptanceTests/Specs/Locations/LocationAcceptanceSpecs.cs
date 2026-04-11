@@ -47,27 +47,24 @@ public class LocationAcceptanceSpecs
     [MemberData(nameof(AllAdaptersData))]
     public async Task LoadsLocationsOnInitialPageLoad(AdapterKind adapterKind)
     {
-        var adapters = await new AdapterFactory(_fixture).CreateAdaptersAsync(adapterKind);
-        foreach (var adapter in adapters)
+        var adapter = await new AdapterFactory(_fixture).CreateAdapterAsync(adapterKind);
+        try
         {
-            try
-            {
-                var dsl = new LocationScenarioDsl(adapter);
+            var dsl = new LocationScenarioDsl(adapter);
 
-                // Given: We're starting fresh
-                await dsl.GivenNoLocationsExistAsync();
+            // Given: We're starting fresh
+            await dsl.GivenNoLocationsExistAsync();
 
-                // When: We load the locations
-                await dsl.WhenLoadingLocationsAsync();
+            // When: We load the locations
+            await dsl.WhenLoadingLocationsAsync();
 
-                // Then: The location count is available and non-negative
-                var count = await adapter.GetLocationCountAsync();
-                Assert.True(count >= 0);
-            }
-            finally
-            {
-                await adapter.DisposeAsync();
-            }
+            // Then: The location count is available and non-negative
+            var count = await adapter.GetLocationCountAsync();
+            Assert.True(count >= 0);
+        }
+        finally
+        {
+            await adapter.DisposeAsync();
         }
     }
 
@@ -82,30 +79,27 @@ public class LocationAcceptanceSpecs
     public async Task CreatesLocationSuccessfully(AdapterKind adapterKind)
     {
         var uniqueId = $"test-hub-{Guid.NewGuid():N}";
-        var adapters = await new AdapterFactory(_fixture).CreateAdaptersAsync(adapterKind);
-        foreach (var adapter in adapters)
+        var adapter = await new AdapterFactory(_fixture).CreateAdapterAsync(adapterKind);
+        try
         {
-            try
-            {
-                var dsl = new LocationScenarioDsl(adapter);
+            var dsl = new LocationScenarioDsl(adapter);
 
-                // Given: We're starting fresh
-                await dsl.GivenNoLocationsExistAsync();
+            // Given: We're starting fresh
+            await dsl.GivenNoLocationsExistAsync();
 
-                // When: We create a new location
-                await dsl.WhenCreateLocationAsync(uniqueId, "Test Hub 1");
+            // When: We create a new location
+            await dsl.WhenCreateLocationAsync(uniqueId, "Test Hub 1");
 
-                // Then: The creation succeeded
-                dsl.ThenLocationCreationSucceededAsync();
+            // Then: The creation succeeded
+            dsl.ThenLocationCreationSucceededAsync();
 
-                // And: The location now appears in the list
-                await dsl.WhenLoadingLocationsAsync();
-                dsl.ThenLocationExistsInListAsync(uniqueId, "Test Hub 1");
-            }
-            finally
-            {
-                await adapter.DisposeAsync();
-            }
+            // And: The location now appears in the list
+            await dsl.WhenLoadingLocationsAsync();
+            dsl.ThenLocationExistsInListAsync(uniqueId, "Test Hub 1");
+        }
+        finally
+        {
+            await adapter.DisposeAsync();
         }
     }
 
@@ -121,30 +115,27 @@ public class LocationAcceptanceSpecs
     {
         var idA = $"loc-a-{Guid.NewGuid():N}";
         var idB = $"loc-b-{Guid.NewGuid():N}";
-        var adapters = await new AdapterFactory(_fixture).CreateAdaptersAsync(adapterKind);
-        foreach (var adapter in adapters)
+        var adapter = await new AdapterFactory(_fixture).CreateAdapterAsync(adapterKind);
+        try
         {
-            try
-            {
-                var dsl = new LocationScenarioDsl(adapter);
+            var dsl = new LocationScenarioDsl(adapter);
 
-                // Given: We create multiple locations
-                await dsl.GivenLocationsExistAsync(
-                    (idA, "Location A"),
-                    (idB, "Location B")
-                );
+            // Given: We create multiple locations
+            await dsl.GivenLocationsExistAsync(
+                (idA, "Location A"),
+                (idB, "Location B")
+            );
 
-                // When: We refresh the locations list
-                await dsl.ThenRefreshLocationsAsync();
+            // When: We refresh the locations list
+            await dsl.ThenRefreshLocationsAsync();
 
-                // Then: Both locations are still visible
-                dsl.ThenLocationExistsInListAsync(idA, "Location A");
-                dsl.ThenLocationExistsInListAsync(idB, "Location B");
-            }
-            finally
-            {
-                await adapter.DisposeAsync();
-            }
+            // Then: Both locations are still visible
+            dsl.ThenLocationExistsInListAsync(idA, "Location A");
+            dsl.ThenLocationExistsInListAsync(idB, "Location B");
+        }
+        finally
+        {
+            await adapter.DisposeAsync();
         }
     }
 }
