@@ -8,6 +8,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JokeSubs.Server", "JokeSubs
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "frontend", "frontend\frontend.esproj", "{CDB4A238-50DB-42BD-9E56-1C55275CA623}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JokeSubs.AcceptanceTests", "JokeSubs.AcceptanceTests\JokeSubs.AcceptanceTests.csproj", "{7E8F9E1A-2B4C-4D6E-8F5A-3C2D1E0F9G8H}"
+EndProject
 
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{CDB4A238-50DB-42BD-9E56-1C55275CA623}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CDB4A238-50DB-42BD-9E56-1C55275CA623}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CDB4A238-50DB-42BD-9E56-1C55275CA623}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E8F9E1A-2B4C-4D6E-8F5A-3C2D1E0F9G8H}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E8F9E1A-2B4C-4D6E-8F5A-3C2D1E0F9G8H}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E8F9E1A-2B4C-4D6E-8F5A-3C2D1E0F9G8H}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E8F9E1A-2B4C-4D6E-8F5A-3C2D1E0F9G8H}.Release|Any CPU.Build.0 = Release|Any CPU
 
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution

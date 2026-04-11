@@ -2,6 +2,7 @@
     "chat.tools.terminal.autoApprove": {
         "aspire run": true,
         "dotnet build": true,
+        "dotnet test": true,
         "dotnet package search": true,
         "npm run build": true
     },
@@ -11,7 +12,8 @@
         "https://github.com/dotnet/*": true,
         "https://learn.microsoft.com": true,
         "https://aspire.dev": true,
-        "https://www.nuget.org": true
+        "https://www.nuget.org": true,
+        "https://xunit.net": true
     },
     "dotnetAcquisitionExtension.existingDotnetPath": [
         {
