@@ -1,4 +1,5 @@
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 
 namespace JokeSubs.Server.Stores;
 
@@ -23,10 +24,9 @@ public sealed class StoreRepository : IStoreRepository
 
     public async Task<IReadOnlyList<Store>> GetAllAsync()
     {
-        var query = new QueryDefinition("SELECT c.id, c.name FROM c");
         var results = new List<Store>();
 
-        using var feed = _container.GetItemQueryIterator<Store>(query);
+        using var feed = _container.GetItemLinqQueryable<Store>().ToFeedIterator();
         while (feed.HasMoreResults)
         {
             var page = await feed.ReadNextAsync();
@@ -43,13 +43,10 @@ public sealed class StoreRepository : IStoreRepository
     {
         var normalizedId = id.Trim().ToLowerInvariant();
 
-        // Use LOWER() on the stored id to enforce case-insensitive uniqueness,
-        // matching the behaviour of the in-memory store.
-        var query = new QueryDefinition(
-            "SELECT VALUE COUNT(1) FROM c WHERE LOWER(c.id) = @normalizedId")
-            .WithParameter("@normalizedId", normalizedId);
-
-        using var feed = _container.GetItemQueryIterator<int>(query);
+        using var feed = _container.GetItemLinqQueryable<Store>()
+            .Where(s => s.Id.ToLower() == normalizedId)
+            .Select(s => 1)
+            .ToFeedIterator();
         if (feed.HasMoreResults)
         {
             var page = await feed.ReadNextAsync();
