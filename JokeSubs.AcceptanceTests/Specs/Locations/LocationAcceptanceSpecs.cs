@@ -10,7 +10,6 @@ namespace JokeSubs.AcceptanceTests.Specs.Locations;
 /// These tests specify end-to-end scenarios in Given/When/Then format,
 /// executable against both UI and API adapters.
 /// </summary>
-[Collection("Aspire")]
 public class LocationAcceptanceSpecs
 {
     private readonly AspireAssemblyFixture _fixture;
