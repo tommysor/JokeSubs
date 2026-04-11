@@ -42,16 +42,6 @@ public class LocationScenarioDsl : IAsyncDisposable
 
     // ==================== THEN ====================
 
-    public async Task ThenLocationCountIsAsync(int expectedCount)
-    {
-        var actualCount = await _adapter.GetLocationCountAsync();
-        if (actualCount != expectedCount)
-        {
-            throw new AssertionException(
-                $"Expected {expectedCount} locations but found {actualCount}");
-        }
-    }
-
     public Task<int> GetLocationCountAsync()
     {
         return _adapter.GetLocationCountAsync();
