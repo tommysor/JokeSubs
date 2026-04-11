@@ -6,7 +6,9 @@
         "dotnet package search": true,
         "dotnet restore": true,
         "dotnet test": true,
-        "npm run build": true
+        "npm audit": true,
+        "npm run build": true,
+        "npm run lint": true,
     },
     "chat.tools.urls.autoApprove": {
         "https://aspire.dev": true,
