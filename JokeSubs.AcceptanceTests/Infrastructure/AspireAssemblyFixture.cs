@@ -1,5 +1,6 @@
 using Aspire.Hosting;
 using Aspire.Hosting.Testing;
+using JokeSubs.AcceptanceTests.Dsl;
 using Xunit;
 
 [assembly: AssemblyFixture(typeof(JokeSubs.AcceptanceTests.Infrastructure.AspireAssemblyFixture))]
@@ -51,5 +52,17 @@ public sealed class AspireAssemblyFixture : IAsyncLifetime
         }
 
         ApiClient?.Dispose();
+    }
+
+    public async Task<LocationScenarioDsl> GetLocationScenarioDsl(AdapterKind kind)
+    {
+        IAcceptanceAdapter adapter = kind switch
+        {
+            AdapterKind.Api => new Adapters.Api.ApiAcceptanceAdapter(this),
+            AdapterKind.Ui => await Adapters.Ui.PlaywrightAcceptanceAdapter.CreateAsync(this),
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Only a single adapter kind is supported per test execution.")
+        };
+
+        return new LocationScenarioDsl(adapter);
     }
 }

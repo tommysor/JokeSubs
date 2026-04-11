@@ -6,7 +6,7 @@ namespace JokeSubs.AcceptanceTests.Dsl;
 /// DSL context for location acceptance scenarios.
 /// Provides Given/When/Then methods to setup, act on, and verify location operations.
 /// </summary>
-public class LocationScenarioDsl
+public class LocationScenarioDsl : IAsyncDisposable
 {
     private readonly IAcceptanceAdapter _adapter;
     private List<LocationItem>? _currentLocations;
@@ -57,6 +57,11 @@ public class LocationScenarioDsl
             throw new AssertionException(
                 $"Expected {expectedCount} locations but found {actualCount}");
         }
+    }
+
+    public Task<int> GetLocationCountAsync()
+    {
+        return _adapter.GetLocationCountAsync();
     }
 
     public void ThenLocationCreationSucceededAsync()
@@ -130,6 +135,11 @@ public class LocationScenarioDsl
     public async Task ThenRefreshLocationsAsync()
     {
         await WhenLoadingLocationsAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _adapter.DisposeAsync();
     }
 }
 

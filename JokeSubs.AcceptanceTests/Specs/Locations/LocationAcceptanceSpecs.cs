@@ -47,8 +47,7 @@ public class LocationAcceptanceSpecs
     [MemberData(nameof(AllAdaptersData))]
     public async Task LoadsLocationsOnInitialPageLoad(AdapterKind adapterKind)
     {
-        await using var adapter = await new AdapterFactory(_fixture).CreateAdapterAsync(adapterKind);
-        var dsl = new LocationScenarioDsl(adapter);
+        await using var dsl = await _fixture.GetLocationScenarioDsl(adapterKind);
 
         // Given: We're starting fresh
         await dsl.GivenNoLocationsExistAsync();
@@ -57,7 +56,7 @@ public class LocationAcceptanceSpecs
         await dsl.WhenLoadingLocationsAsync();
 
         // Then: The location count is available and non-negative
-        var count = await adapter.GetLocationCountAsync();
+        var count = await dsl.GetLocationCountAsync();
         Assert.True(count >= 0);
     }
 
@@ -72,8 +71,7 @@ public class LocationAcceptanceSpecs
     public async Task CreatesLocationSuccessfully(AdapterKind adapterKind)
     {
         var uniqueId = $"test-hub-{Guid.NewGuid():N}";
-        await using var adapter = await new AdapterFactory(_fixture).CreateAdapterAsync(adapterKind);
-        var dsl = new LocationScenarioDsl(adapter);
+        await using var dsl = await _fixture.GetLocationScenarioDsl(adapterKind);
 
         // Given: We're starting fresh
         await dsl.GivenNoLocationsExistAsync();
@@ -101,8 +99,7 @@ public class LocationAcceptanceSpecs
     {
         var idA = $"loc-a-{Guid.NewGuid():N}";
         var idB = $"loc-b-{Guid.NewGuid():N}";
-        await using var adapter = await new AdapterFactory(_fixture).CreateAdapterAsync(adapterKind);
-        var dsl = new LocationScenarioDsl(adapter);
+        await using var dsl = await _fixture.GetLocationScenarioDsl(adapterKind);
 
         // Given: We create multiple locations
         await dsl.GivenLocationsExistAsync(
