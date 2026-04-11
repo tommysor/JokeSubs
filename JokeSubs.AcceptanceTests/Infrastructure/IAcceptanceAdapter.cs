@@ -27,7 +27,7 @@ public record CreateLocationResult
 /// Represents the contract for interacting with the SUT (System Under Test) via different transports.
 /// Implementations include HTTP API and Playwright UI adapters.
 /// </summary>
-public interface IAcceptanceAdapter
+public interface IAcceptanceAdapter : IAsyncDisposable
 {
     /// <summary>
     /// Gets the kind of adapter (e.g., API or UI).
@@ -50,8 +50,4 @@ public interface IAcceptanceAdapter
     /// </summary>
     Task<int> GetLocationCountAsync();
 
-    /// <summary>
-    /// Cleans up adapter resources (e.g., browser session for UI adapter).
-    /// </summary>
-    Task DisposeAsync();
 }

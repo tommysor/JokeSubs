@@ -150,7 +150,7 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
         throw new InvalidOperationException($"Could not parse location count: {countText}");
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _page.CloseAsync();
         await _browser.CloseAsync();

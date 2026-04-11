@@ -80,9 +80,9 @@ public class ApiAcceptanceAdapter : IAcceptanceAdapter
         return locations.Count;
     }
 
-    public Task DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         // HttpClient is managed by the fixture, no per-adapter cleanup needed
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }
