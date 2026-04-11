@@ -2,6 +2,8 @@
     "chat.tools.terminal.autoApprove": {
         "aspire run": true,
         "dotnet build": true,
+        "dotnet list": true,
+        "dotnet restore": true,
         "dotnet test": true,
         "dotnet package search": true,
         "npm run build": true
