@@ -19,13 +19,6 @@ public class LocationScenarioDsl : IAsyncDisposable
 
     // ==================== GIVEN ====================
 
-    public async Task GivenNoLocationsExistAsync()
-    {
-        // Keep a baseline snapshot for scenarios that need to compare before/after.
-        // We do not enforce emptiness because Cosmos data may persist across runs.
-        _currentLocations = await _adapter.GetLocationsAsync();
-    }
-
     public async Task GivenLocationsExistAsync(params (string id, string name)[] locations)
     {
         foreach (var (id, name) in locations)

@@ -45,9 +45,6 @@ public class LocationAcceptanceSpecs
     {
         await using var dsl = await _fixture.GetLocationScenarioDsl(adapterKind);
 
-        // Given: We're starting fresh
-        await dsl.GivenNoLocationsExistAsync();
-
         // When: We load the locations
         await dsl.WhenLoadingLocationsAsync();
 
@@ -62,9 +59,6 @@ public class LocationAcceptanceSpecs
     {
         var uniqueId = $"test-hub-{Guid.NewGuid():N}";
         await using var dsl = await _fixture.GetLocationScenarioDsl(adapterKind);
-
-        // Given: We're starting fresh
-        await dsl.GivenNoLocationsExistAsync();
 
         // When: We create a new location
         await dsl.WhenCreateLocationAsync(uniqueId, "Test Hub 1");
