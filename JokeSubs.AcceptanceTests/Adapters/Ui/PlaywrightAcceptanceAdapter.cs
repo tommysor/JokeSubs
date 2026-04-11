@@ -13,8 +13,6 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
     private readonly IBrowser _browser;
     private readonly IPlaywright _playwrightInstance;
 
-    public AdapterKind Kind => AdapterKind.Ui;
-
     private PlaywrightAcceptanceAdapter(IPage page, IBrowser browser, IPlaywright playwright)
     {
         _page = page;

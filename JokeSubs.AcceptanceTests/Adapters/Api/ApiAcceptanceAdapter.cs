@@ -16,8 +16,6 @@ public class ApiAcceptanceAdapter : IAcceptanceAdapter
         PropertyNameCaseInsensitive = true
     };
 
-    public AdapterKind Kind => AdapterKind.Api;
-
     public ApiAcceptanceAdapter(AspireAssemblyFixture fixture, HttpClient client)
     {
         _client = client;

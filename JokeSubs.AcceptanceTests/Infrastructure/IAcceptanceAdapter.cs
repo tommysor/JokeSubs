@@ -30,11 +30,6 @@ public record CreateLocationResult
 public interface IAcceptanceAdapter : IAsyncDisposable
 {
     /// <summary>
-    /// Gets the kind of adapter (e.g., API or UI).
-    /// </summary>
-    AdapterKind Kind { get; }
-
-    /// <summary>
     /// Loads the current list of locations.
     /// </summary>
     Task<List<LocationItem>> GetLocationsAsync();
