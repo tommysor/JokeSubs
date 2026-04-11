@@ -32,8 +32,8 @@ RUN apt-get update \
         libxfixes3 \
         libxkbcommon0 \
         libxrandr2 \
+        libasound2t64 \
         xdg-utils \
-    && if apt-cache show libasound2t64 >/dev/null 2>&1; then apt-get install -y --no-install-recommends libasound2t64; else apt-get install -y --no-install-recommends libasound2; fi \
     && rm -rf /var/lib/apt/lists/*
 
 # Install virtual display + VNC + noVNC for headed Playwright browsing.
