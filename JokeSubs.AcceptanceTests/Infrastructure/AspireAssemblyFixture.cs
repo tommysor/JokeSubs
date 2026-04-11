@@ -1,7 +1,6 @@
 using Aspire.Hosting;
 using Aspire.Hosting.Testing;
 using JokeSubs.AcceptanceTests.Dsl;
-using Xunit;
 
 [assembly: AssemblyFixture(typeof(JokeSubs.AcceptanceTests.Infrastructure.AspireAssemblyFixture))]
 
@@ -14,8 +13,8 @@ namespace JokeSubs.AcceptanceTests.Infrastructure;
 public sealed class AspireAssemblyFixture : IAsyncLifetime
 {
     private DistributedApplication? _app;
-    public HttpClient ApiClient { get; private set; } = null!;
-    public Uri UiBaseUri { get; private set; } = null!;
+    private HttpClient? _apiClient;
+    private Uri? _uiBaseUri;
 
     async ValueTask IAsyncLifetime.InitializeAsync()
     {
@@ -36,11 +35,11 @@ public sealed class AspireAssemblyFixture : IAsyncLifetime
         await _app.ResourceNotifications.WaitForResourceHealthyAsync("server", cts.Token);
         await _app.ResourceNotifications.WaitForResourceHealthyAsync("webfrontend", cts.Token);
 
-        ApiClient = _app.CreateHttpClient("server");
-        ApiClient.Timeout = TimeSpan.FromSeconds(30);
+        _apiClient = _app.CreateHttpClient("server");
+        _apiClient.Timeout = TimeSpan.FromSeconds(30);
 
         using var frontendClient = _app.CreateHttpClient("webfrontend");
-        UiBaseUri = frontendClient.BaseAddress
+        _uiBaseUri = frontendClient.BaseAddress
             ?? throw new InvalidOperationException("Unable to resolve webfrontend base address from Aspire test host.");
     }
 
@@ -51,15 +50,17 @@ public sealed class AspireAssemblyFixture : IAsyncLifetime
             await _app.DisposeAsync();
         }
 
-        ApiClient?.Dispose();
+        _apiClient?.Dispose();
     }
 
     public async Task<LocationScenarioDsl> GetLocationScenarioDsl(AdapterKind kind)
     {
+        if (_apiClient == null) throw new InvalidOperationException("API client is not initialized.");
+        if (_uiBaseUri == null) throw new InvalidOperationException("UI base URI is not initialized.");
         IAcceptanceAdapter adapter = kind switch
         {
-            AdapterKind.Api => new Adapters.Api.ApiAcceptanceAdapter(this),
-            AdapterKind.Ui => await Adapters.Ui.PlaywrightAcceptanceAdapter.CreateAsync(this),
+            AdapterKind.Api => new Adapters.Api.ApiAcceptanceAdapter(this, _apiClient),
+            AdapterKind.Ui => await Adapters.Ui.PlaywrightAcceptanceAdapter.CreateAsync(this, _uiBaseUri.ToString()),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Only a single adapter kind is supported per test execution.")
         };
 

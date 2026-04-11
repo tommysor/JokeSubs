@@ -18,9 +18,9 @@ public class ApiAcceptanceAdapter : IAcceptanceAdapter
 
     public AdapterKind Kind => AdapterKind.Api;
 
-    public ApiAcceptanceAdapter(AspireAssemblyFixture fixture)
+    public ApiAcceptanceAdapter(AspireAssemblyFixture fixture, HttpClient client)
     {
-        _client = fixture.ApiClient;
+        _client = client;
     }
 
     public async Task<List<LocationItem>> GetLocationsAsync()

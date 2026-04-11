@@ -25,7 +25,7 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
     /// <summary>
     /// Factory method to create and initialize a Playwright adapter with a browser session.
     /// </summary>
-    public static async Task<PlaywrightAcceptanceAdapter> CreateAsync(AspireAssemblyFixture fixture)
+    public static async Task<PlaywrightAcceptanceAdapter> CreateAsync(AspireAssemblyFixture fixture, string baseUri)
     {
         var playwright = await Playwright.CreateAsync();
 
@@ -35,7 +35,7 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
         });
 
         var page = await browser.NewPageAsync();
-        await page.GotoAsync(fixture.UiBaseUri.ToString());
+        await page.GotoAsync(baseUri);
 
         return new PlaywrightAcceptanceAdapter(page, browser, playwright);
     }
