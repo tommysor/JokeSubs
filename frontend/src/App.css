@@ -57,7 +57,7 @@
 .eyebrow,
 .panel-kicker,
 .hero-stat-label,
-.location-meta,
+.store-meta,
 .field-hint {
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -189,18 +189,18 @@
   border: 1px solid rgba(24, 48, 43, 0.08);
 }
 
-.location-name,
+.store-name,
 .empty-state-title {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 700;
 }
 
-.location-meta {
+.store-meta {
   margin: 0.3rem 0 0;
 }
 
-.location-id {
+.store-id {
   border-radius: 999px;
   padding: 0.45rem 0.8rem;
   background: var(--accent-soft);
@@ -226,7 +226,7 @@
   margin: 0.4rem 0 0;
 }
 
-.location-form {
+.store-form {
   display: grid;
   gap: 1rem;
 }

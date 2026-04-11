@@ -53,7 +53,7 @@ public sealed class AspireAssemblyFixture : IAsyncLifetime
         _apiClient?.Dispose();
     }
 
-    public async Task<LocationScenarioDsl> GetLocationScenarioDsl(AdapterKind kind)
+    public async Task<StoreScenarioDsl> GetStoreScenarioDsl(AdapterKind kind)
     {
         if (_apiClient == null) throw new InvalidOperationException("API client is not initialized.");
         if (_uiBaseUri == null) throw new InvalidOperationException("UI base URI is not initialized.");
@@ -64,6 +64,6 @@ public sealed class AspireAssemblyFixture : IAsyncLifetime
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Only a single adapter kind is supported per test execution.")
         };
 
-        return new LocationScenarioDsl(adapter);
+        return new StoreScenarioDsl(adapter);
     }
 }

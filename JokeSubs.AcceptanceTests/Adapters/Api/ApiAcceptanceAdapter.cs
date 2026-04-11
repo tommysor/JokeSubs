@@ -6,7 +6,7 @@ namespace JokeSubs.AcceptanceTests.Adapters.Api;
 
 /// <summary>
 /// Acceptance adapter that interacts with the application via HTTP API.
-/// Uses HttpClient to call the /api/locations endpoints.
+/// Uses HttpClient to call the /api/stores endpoints.
 /// </summary>
 public class ApiAcceptanceAdapter : IAcceptanceAdapter
 {
@@ -21,32 +21,32 @@ public class ApiAcceptanceAdapter : IAcceptanceAdapter
         _client = client;
     }
 
-    public async Task<List<LocationItem>> GetLocationsAsync()
+    public async Task<List<StoreItem>> GetStoresAsync()
     {
-        var response = await _client.GetAsync("/api/locations");
+        var response = await _client.GetAsync("/api/stores");
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync();
-        var locations = JsonSerializer.Deserialize<List<LocationItem>>(content, JsonOptions)
-            ?? throw new InvalidOperationException("Failed to deserialize locations from API response");
+        var stores = JsonSerializer.Deserialize<List<StoreItem>>(content, JsonOptions)
+            ?? throw new InvalidOperationException("Failed to deserialize stores from API response");
 
-        return locations;
+        return stores;
     }
 
-    public async Task<CreateLocationResult> CreateLocationAsync(string id, string name)
+    public async Task<CreateStoreResult> CreateStoreAsync(string id, string name)
     {
         var payload = new { id, name };
-        var response = await _client.PostAsJsonAsync("/api/locations", payload);
+        var response = await _client.PostAsJsonAsync("/api/stores", payload);
 
         // 201 Created: successful creation
         if (response.StatusCode == System.Net.HttpStatusCode.Created)
         {
             var content = await response.Content.ReadAsStringAsync();
-            var location = JsonSerializer.Deserialize<LocationItem>(content, JsonOptions)
-                ?? throw new InvalidOperationException("Failed to deserialize created location");
-            return new CreateLocationResult
+            var store = JsonSerializer.Deserialize<StoreItem>(content, JsonOptions)
+                ?? throw new InvalidOperationException("Failed to deserialize created store");
+            return new CreateStoreResult
             {
-                Location = location,
+                Store = store,
                 ValidationError = null,
                 Success = true
             };
@@ -58,9 +58,9 @@ public class ApiAcceptanceAdapter : IAcceptanceAdapter
             var content = await response.Content.ReadAsStringAsync();
             var error = JsonSerializer.Deserialize<ValidationErrorResult>(content, JsonOptions)
                 ?? new ValidationErrorResult(null, new Dictionary<string, string[]>());
-            return new CreateLocationResult
+            return new CreateStoreResult
             {
-                Location = null,
+                Store = null,
                 ValidationError = error,
                 Success = false
             };
@@ -68,14 +68,14 @@ public class ApiAcceptanceAdapter : IAcceptanceAdapter
 
         // Any other response code is a hard failure
         throw new HttpRequestException(
-            $"Unexpected response from Create Location endpoint: {response.StatusCode}. " +
+            $"Unexpected response from Create Store endpoint: {response.StatusCode}. " +
             $"Body: {await response.Content.ReadAsStringAsync()}");
     }
 
-    public async Task<int> GetLocationCountAsync()
+    public async Task<int> GetStoreCountAsync()
     {
-        var locations = await GetLocationsAsync();
-        return locations.Count;
+        var stores = await GetStoresAsync();
+        return stores.Count;
     }
 
     public ValueTask DisposeAsync()

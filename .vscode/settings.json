@@ -11,7 +11,15 @@
         "npm audit": true,
         "npm run build": true,
         "npm run lint": true,
-        "set": true
+        "set": true,
+        "/^npm --prefix frontend run build$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^npm --prefix /workspaces/JokeSubs/frontend run build$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
     },
     "chat.tools.urls.autoApprove": {
         "https://aspire.dev": true,

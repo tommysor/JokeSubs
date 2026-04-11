@@ -3,92 +3,92 @@ using JokeSubs.AcceptanceTests.Infrastructure;
 namespace JokeSubs.AcceptanceTests.Dsl;
 
 /// <summary>
-/// DSL context for location acceptance scenarios.
-/// Provides Given/When/Then methods to setup, act on, and verify location operations.
+/// DSL context for store acceptance scenarios.
+/// Provides Given/When/Then methods to setup, act on, and verify store operations.
 /// </summary>
-public class LocationScenarioDsl : IAsyncDisposable
+public class StoreScenarioDsl : IAsyncDisposable
 {
     private readonly IAcceptanceAdapter _adapter;
-    private List<LocationItem>? _currentLocations;
-    private CreateLocationResult? _lastCreateResult;
+    private List<StoreItem>? _currentStores;
+    private CreateStoreResult? _lastCreateResult;
 
-    public LocationScenarioDsl(IAcceptanceAdapter adapter)
+    public StoreScenarioDsl(IAcceptanceAdapter adapter)
     {
         _adapter = adapter;
     }
 
     // ==================== GIVEN ====================
 
-    public async Task GivenLocationsExistAsync(params (string id, string name)[] locations)
+    public async Task GivenStoresExistAsync(params (string id, string name)[] stores)
     {
-        foreach (var (id, name) in locations)
+        foreach (var (id, name) in stores)
         {
-            await WhenCreateLocationAsync(id, name);
-            ThenLocationCreationSucceededAsync();
+            await WhenCreateStoreAsync(id, name);
+            ThenStoreCreationSucceededAsync();
         }
     }
 
     // ==================== WHEN ====================
 
-    public async Task WhenLoadingLocationsAsync()
+    public async Task WhenLoadingStoresAsync()
     {
-        _currentLocations = await _adapter.GetLocationsAsync();
+        _currentStores = await _adapter.GetStoresAsync();
     }
 
-    public async Task WhenCreateLocationAsync(string id, string name)
+    public async Task WhenCreateStoreAsync(string id, string name)
     {
-        _lastCreateResult = await _adapter.CreateLocationAsync(id, name);
+        _lastCreateResult = await _adapter.CreateStoreAsync(id, name);
     }
 
     // ==================== THEN ====================
 
-    public Task<int> GetLocationCountAsync()
+    public Task<int> GetStoreCountAsync()
     {
-        return _adapter.GetLocationCountAsync();
+        return _adapter.GetStoreCountAsync();
     }
 
-    public void ThenLocationCreationSucceededAsync()
+    public void ThenStoreCreationSucceededAsync()
     {
         if (_lastCreateResult?.Success != true)
         {
             var errorMsg = _lastCreateResult?.ValidationError?.Title
                 ?? "Unknown error";
             throw new AssertionException(
-                $"Location creation failed: {errorMsg}");
+                $"Store creation failed: {errorMsg}");
         }
     }
 
-    public void ThenLocationCreationFailedAsync()
+    public void ThenStoreCreationFailedAsync()
     {
         if (_lastCreateResult?.Success == true)
         {
             throw new AssertionException(
-                "Location creation succeeded when it was expected to fail");
+                "Store creation succeeded when it was expected to fail");
         }
     }
 
-    public void ThenLocationExistsInListAsync(string id, string name)
+    public void ThenStoreExistsInListAsync(string id, string name)
     {
-        var found = _currentLocations?.FirstOrDefault(l =>
+        var found = _currentStores?.FirstOrDefault(l =>
             l.Id.Equals(id, StringComparison.OrdinalIgnoreCase) &&
             l.Name == name);
 
         if (found == null)
         {
             throw new AssertionException(
-                $"Expected location {id} ({name}) to exist in the list but it was not found");
+                $"Expected store {id} ({name}) to exist in the list but it was not found");
         }
     }
 
-    public void ThenLocationDoesNotExistInListAsync(string id)
+    public void ThenStoreDoesNotExistInListAsync(string id)
     {
-        var found = _currentLocations?.FirstOrDefault(l =>
+        var found = _currentStores?.FirstOrDefault(l =>
             l.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
 
         if (found != null)
         {
             throw new AssertionException(
-                $"Expected location {id} to not exist but it was found");
+                $"Expected store {id} to not exist but it was found");
         }
     }
 
@@ -115,9 +115,9 @@ public class LocationScenarioDsl : IAsyncDisposable
         }
     }
 
-    public async Task ThenRefreshLocationsAsync()
+    public async Task ThenRefreshStoresAsync()
     {
-        await WhenLoadingLocationsAsync();
+        await WhenLoadingStoresAsync();
     }
 
     public async ValueTask DisposeAsync()

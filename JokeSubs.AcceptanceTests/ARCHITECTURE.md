@@ -9,7 +9,7 @@ The JokeSubs acceptance test project (`JokeSubs.AcceptanceTests`) implements a t
 │                    Spec Tests Layer                         │
 │            (Given/When/Then Scenario Definitions)           │
 │                                                             │
-│ - LocationAcceptanceSpecs.cs                               │
+│ - StoreAcceptanceSpecs.cs                               │
 │ - Each scenario: 1 test × N adapters (API, UI)             │
 │ - Uses [Theory] with [MemberData] for adapter selection    │
 └─────────────────────────────────────────────────────────────┘
@@ -19,7 +19,7 @@ The JokeSubs acceptance test project (`JokeSubs.AcceptanceTests`) implements a t
 │                      DSL Layer                              │
 │              (Transport-Agnostic Operations)                │
 │                                                             │
-│ - LocationScenarioDsl.cs                                   │
+│ - StoreScenarioDsl.cs                                   │
 │ - Fluent interface: Given/When/Then methods                │
 │ - Uses IAcceptanceAdapter abstraction                      │
 │ - No adapter-specific code                                 │
@@ -66,11 +66,11 @@ The JokeSubs acceptance test project (`JokeSubs.AcceptanceTests`) implements a t
 
 **IAcceptanceAdapter** (`Infrastructure/IAcceptanceAdapter.cs`)
 - Contract defining operations all adapters must support
-- Exposes `LocationItem`, `ValidationErrorResult`, `CreateLocationResult` domain models
+- Exposes `StoreItem`, `ValidationErrorResult`, `CreateStoreResult` domain models
 - Adapter kind enumeration: `AdapterKind.Api`, `AdapterKind.Ui`, `AdapterKind.All`
 
 **ApiAcceptanceAdapter** (`Adapters/Api/ApiAcceptanceAdapter.cs`)
-- Uses HttpClient to call `/api/locations` endpoints
+- Uses HttpClient to call `/api/stores` endpoints
 - JSON deserialization via `System.Text.Json`
 - Maps HTTP status codes (201 created, 400 validation) to result types
 - No browser or UI state—pure API interaction
@@ -78,7 +78,7 @@ The JokeSubs acceptance test project (`JokeSubs.AcceptanceTests`) implements a t
 **PlaywrightAcceptanceAdapter** (`Adapters/Ui/PlaywrightAcceptanceAdapter.cs`)
 - Uses Playwright for browser automation
 - Navigates to frontend UI
-- Queries selectors: `input[name="id"]`, `input[name="name"]`, `.hero-stat-value`, `.location-name`, etc.
+- Queries selectors: `input[name="id"]`, `input[name="name"]`, `.hero-stat-value`, `.store-name`, etc.
 - Simulates user interactions (fill, click, wait)
 - Parses UI state and error messages
 
@@ -89,19 +89,19 @@ The JokeSubs acceptance test project (`JokeSubs.AcceptanceTests`) implements a t
 
 ### 3. DSL Layer
 
-**LocationScenarioDsl** (`Dsl/LocationScenarioDsl.cs`)
+**StoreScenarioDsl** (`Dsl/StoreScenarioDsl.cs`)
 - Fluent Given/When/Then operations
-- Maintains scenario state (`_currentLocations`, `_lastCreateResult`)
+- Maintains scenario state (`_currentStores`, `_lastCreateResult`)
 - Methods use generic `IAcceptanceAdapter` interface, no adapter knowledge
 - Examples:
-  - `GivenNoLocationsExistAsync()`
-  - `WhenCreateLocationAsync(id, name)`
-  - `ThenLocationExistsInListAsync(id, name)`
+  - `GivenNoStoresExistAsync()`
+  - `WhenCreateStoreAsync(id, name)`
+  - `ThenStoreExistsInListAsync(id, name)`
   - `ThenValidationErrorExistsForFieldAsync(fieldName, message)`
 
 ### 4. Spec Layer
 
-**LocationAcceptanceSpecs** (`Specs/Locations/LocationAcceptanceSpecs.cs`)
+**StoreAcceptanceSpecs** (`Specs/Stores/StoreAcceptanceSpecs.cs`)
 - Test class decorated with `[Collection("Aspire")]` to use assembly fixture
 - Receives `AspireAssemblyFixture` via constructor injection
 - Test methods use `[Theory]` with `[MemberData]` for adapter selection
@@ -126,7 +126,7 @@ The JokeSubs acceptance test project (`JokeSubs.AcceptanceTests`) implements a t
 
 3. Test method executes with AdapterKind parameter
    ├─ Creates adapter(s) via AdapterFactory
-   ├─ Wraps adapter(s) in LocationScenarioDsl
+   ├─ Wraps adapter(s) in StoreScenarioDsl
    ├─ Executes Given/When/Then operations
    ├─ Adapter translates to API or UI calls
    └─ Adapter disposes resources after test
@@ -137,7 +137,7 @@ The JokeSubs acceptance test project (`JokeSubs.AcceptanceTests`) implements a t
    └─ Validates API and UI consistency
 ```
 
-### Example: CreateLocationSuccessfully with API Adapter
+### Example: CreateStoreSuccessfully with API Adapter
 
 ```
 Test Method Called
@@ -146,25 +146,25 @@ Test Method Called
      └─ AdapterFactory.CreateAdaptersAsync(AdapterKind.Api)
         └─ Creates ApiAcceptanceAdapter with fixture.ApiClient
            │
-           └─ LocationScenarioDsl wraps adapter
+           └─ StoreScenarioDsl wraps adapter
               │
-              ├─ Given: GivenNoLocationsExistAsync()
-              │     └─ adapter.GetLocationsAsync()
-              │        └─ HTTP GET /api/locations
+              ├─ Given: GivenNoStoresExistAsync()
+              │     └─ adapter.GetStoresAsync()
+              │        └─ HTTP GET /api/stores
               │           └─ Parses JSON, asserts empty list
               │
-              ├─ When: CreateLocationAsync("test-hub-1", "Test Hub 1")
-              │     └─ adapter.CreateLocationAsync(id, name)
-              │        └─ HTTP POST /api/locations {id, name}
-              │           └─ Receives 201 Created + Location JSON
+              ├─ When: CreateStoreAsync("test-hub-1", "Test Hub 1")
+              │     └─ adapter.CreateStoreAsync(id, name)
+              │        └─ HTTP POST /api/stores {id, name}
+              │           └─ Receives 201 Created + Store JSON
               │
               └─ Then: Assertions
-                    ├─ ThenLocationCreationSucceededAsync()
+                    ├─ ThenStoreCreationSucceededAsync()
                     │   └─ Checks _lastCreateResult.Success == true
-                    ├─ WhenLoadingLocationsAsync()
-                    │   └─ adapter.GetLocationsAsync() again
-                    │      └─ HTTP GET /api/locations
-                    └─ ThenLocationExistsInListAsync()
+                    ├─ WhenLoadingStoresAsync()
+                    │   └─ adapter.GetStoresAsync() again
+                    │      └─ HTTP GET /api/stores
+                    └─ ThenStoreExistsInListAsync()
                         └─ Validates {id, name} in list
 ```
 
@@ -194,14 +194,14 @@ dotnet test JokeSubs.AcceptanceTests --filter "Ui)"
 
 ### Adding a New Scenario
 
-1. Add test method to `LocationAcceptanceSpecs`
+1. Add test method to `StoreAcceptanceSpecs`
 2. Use `[Theory]` and `[MemberData(nameof(AllAdaptersData))]` (or API/UI variants)
 3. Call DSL methods; adapters handle the transport details
 4. No adapter-specific code in spec
 
 ### Adding a New DSL Operation
 
-1. Add method to `LocationScenarioDsl` (e.g., `WhenRefreshLocationsAsync()`)
+1. Add method to `StoreScenarioDsl` (e.g., `WhenRefreshStoresAsync()`)
 2. Implement using adapter methods from `IAcceptanceAdapter`
 3. All existing tests can now use the new DSL operation
 
@@ -217,7 +217,7 @@ dotnet test JokeSubs.AcceptanceTests --filter "Ui)"
 
 ### Current (V1)
 
-- **Three scenarios:** Load list, create location, persistence
+- **Three scenarios:** Load list, create store, persistence
 - **Two adapters:** API (HttpClient), UI (Playwright)
 - **DSL:** Basic Given/When/Then for happy path
 - **Fixture:** Assembly-scoped, real Cosmos DB emulator

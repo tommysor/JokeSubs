@@ -7,12 +7,12 @@ var cosmos = builder.AddAzureCosmosDB("cosmos")
         .WithLifetime(ContainerLifetime.Persistent));
 
 var db = cosmos.AddCosmosDatabase("jokesubs");
-var locationsContainer = db.AddContainer("locations", "/id");
+var storesContainer = db.AddContainer("stores", "/id");
 
 var server = builder.AddProject<Projects.JokeSubs_Server>("server")
     .WithHttpHealthCheck("/health")
     .WithExternalHttpEndpoints()
-    .WithReference(locationsContainer)
+    .WithReference(storesContainer)
     .WaitFor(cosmos);
 
 var webfrontend = builder.AddViteApp("webfrontend", "../frontend")

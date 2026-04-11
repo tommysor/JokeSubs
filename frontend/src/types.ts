@@ -1,9 +1,9 @@
-export type Location = {
+export type Store = {
   id: string
   name: string
 }
 
-export type CreateLocationInput = {
+export type CreateStoreInput = {
   id: string
   name: string
 }

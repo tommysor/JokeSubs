@@ -1,4 +1,4 @@
-using JokeSubs.Server.Locations;
+using JokeSubs.Server.Stores;
 using Microsoft.Azure.Cosmos;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,7 +9,7 @@ builder.AddServiceDefaults();
 // Add services to the container.
 builder.Services.AddProblemDetails();
 
-builder.AddAzureCosmosClient("locations",
+builder.AddAzureCosmosClient("stores",
     configureClientOptions: options =>
     {
         options.SerializerOptions = new CosmosSerializationOptions
@@ -18,7 +18,7 @@ builder.AddAzureCosmosClient("locations",
         };
     });
 
-builder.Services.AddSingleton<ILocationStore, CosmosLocationStore>();
+builder.Services.AddSingleton<IStoreStore, CosmosStoreStore>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -34,7 +34,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapDefaultEndpoints();
-app.MapLocationEndpoints();
+app.MapStoreEndpoints();
 
 app.UseFileServer();
 

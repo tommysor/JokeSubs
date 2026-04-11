@@ -1,12 +1,12 @@
 namespace JokeSubs.AcceptanceTests.Infrastructure;
 
 /// <summary>
-/// Represents a location record as returned by the API.
+/// Represents a store record as returned by the API.
 /// </summary>
-public record LocationItem(string Id, string Name);
+public record StoreItem(string Id, string Name);
 
 /// <summary>
-/// Represents validation errors returned by the API during location creation.
+/// Represents validation errors returned by the API during store creation.
 /// </summary>
 public record ValidationErrorResult(
     string? Title,
@@ -14,11 +14,11 @@ public record ValidationErrorResult(
 );
 
 /// <summary>
-/// Result of a location creation attempt.
+/// Result of a store creation attempt.
 /// </summary>
-public record CreateLocationResult
+public record CreateStoreResult
 {
-    public required LocationItem? Location { get; init; }
+    public required StoreItem? Store { get; init; }
     public required ValidationErrorResult? ValidationError { get; init; }
     public required bool Success { get; init; }
 }
@@ -30,19 +30,19 @@ public record CreateLocationResult
 public interface IAcceptanceAdapter : IAsyncDisposable
 {
     /// <summary>
-    /// Loads the current list of locations.
+    /// Loads the current list of stores.
     /// </summary>
-    Task<List<LocationItem>> GetLocationsAsync();
+    Task<List<StoreItem>> GetStoresAsync();
 
     /// <summary>
-    /// Creates a new location with the given ID and name.
+    /// Creates a new store with the given ID and name.
     /// Returns success/validation error information.
     /// </summary>
-    Task<CreateLocationResult> CreateLocationAsync(string id, string name);
+    Task<CreateStoreResult> CreateStoreAsync(string id, string name);
 
     /// <summary>
-    /// Gets the count of active locations currently displayed.
+    /// Gets the count of active stores currently displayed.
     /// </summary>
-    Task<int> GetLocationCountAsync();
+    Task<int> GetStoreCountAsync();
 
 }

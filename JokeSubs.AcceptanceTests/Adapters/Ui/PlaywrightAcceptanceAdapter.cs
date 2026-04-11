@@ -38,33 +38,33 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
         return new PlaywrightAcceptanceAdapter(page, browser, playwright);
     }
 
-    public async Task<List<LocationItem>> GetLocationsAsync()
+    public async Task<List<StoreItem>> GetStoresAsync()
     {
-        // Wait for the location list to be present in the DOM
+        // Wait for the store list to be present in the DOM
         await _page.WaitForSelectorAsync(".list");
 
-        // Get all location rows and parse them
-        var locations = new List<LocationItem>();
+        // Get all store rows and parse them
+        var stores = new List<StoreItem>();
         var rows = await _page.QuerySelectorAllAsync(".list-row");
 
         foreach (var row in rows)
         {
-            var nameEl = await row.QuerySelectorAsync(".location-name");
-            var idEl = await row.QuerySelectorAsync(".location-id");
+            var nameEl = await row.QuerySelectorAsync(".store-name");
+            var idEl = await row.QuerySelectorAsync(".store-id");
 
             if (nameEl != null && idEl != null)
             {
                 var name = await nameEl.TextContentAsync() ?? "";
                 var id = await idEl.TextContentAsync() ?? "";
 
-                locations.Add(new LocationItem(id.Trim(), name.Trim()));
+                stores.Add(new StoreItem(id.Trim(), name.Trim()));
             }
         }
 
-        return locations;
+        return stores;
     }
 
-    public async Task<CreateLocationResult> CreateLocationAsync(string id, string name)
+    public async Task<CreateStoreResult> CreateStoreAsync(string id, string name)
     {
         // Clear any previous error messages
         await ClearFormErrorsAsync();
@@ -79,7 +79,7 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
         await nameInput.FillAsync(name);
 
         // Click the submit button
-        var submitButton = await _page.QuerySelectorAsync("button:has-text('Add location')")
+        var submitButton = await _page.QuerySelectorAsync("button:has-text('Add store')")
             ?? throw new InvalidOperationException("Submit button not found");
         await submitButton.ClickAsync();
 
@@ -100,9 +100,9 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
                 errors["Name"] = [nameError];
 
             var submitErrorText = submitError != null ? await submitError.TextContentAsync() : null;
-            return new CreateLocationResult
+            return new CreateStoreResult
             {
-                Location = null,
+                Store = null,
                 ValidationError = new ValidationErrorResult(
                     submitErrorText,
                     errors
@@ -115,13 +115,13 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
         var idInputValueAfter = await idInput.GetAttributeAsync("value");
         if (string.IsNullOrEmpty(idInputValueAfter))
         {
-            // Form cleared = successful submission; the new location should now be in the list
-            var locations = await GetLocationsAsync();
-            var created = locations.FirstOrDefault(l => l.Id == id);
+            // Form cleared = successful submission; the new store should now be in the list
+            var stores = await GetStoresAsync();
+            var created = stores.FirstOrDefault(l => l.Id == id);
 
-            return new CreateLocationResult
+            return new CreateStoreResult
             {
-                Location = created,
+                Store = created,
                 ValidationError = null,
                 Success = created != null
             };
@@ -130,13 +130,13 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
         throw new InvalidOperationException("Unexpected state after form submission");
     }
 
-    public async Task<int> GetLocationCountAsync()
+    public async Task<int> GetStoreCountAsync()
     {
-        // Look for the hero stat value element which displays the active locations count
+        // Look for the hero stat value element which displays the active stores count
         var countElement = await _page.QuerySelectorAsync(".hero-stat-value");
         if (countElement == null)
         {
-            throw new InvalidOperationException("Location count element not found");
+            throw new InvalidOperationException("Store count element not found");
         }
 
         var countText = await countElement.TextContentAsync() ?? "0";
@@ -145,7 +145,7 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
             return count;
         }
 
-        throw new InvalidOperationException($"Could not parse location count: {countText}");
+        throw new InvalidOperationException($"Could not parse store count: {countText}");
     }
 
     public async ValueTask DisposeAsync()
@@ -167,7 +167,7 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
 
     private async Task<string?> GetFieldErrorAsync(string fieldName)
     {
-        var errorId = fieldName == "id" ? "location-id-error" : "location-name-error";
+        var errorId = fieldName == "id" ? "store-id-error" : "store-name-error";
         var errorElement = await _page.QuerySelectorAsync($"#{errorId}");
 
         if (errorElement == null)

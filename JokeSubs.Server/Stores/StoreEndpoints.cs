@@ -1,36 +1,36 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace JokeSubs.Server.Locations;
+namespace JokeSubs.Server.Stores;
 
-public static class LocationEndpoints
+public static class StoreEndpoints
 {
-    public static IEndpointRouteBuilder MapLocationEndpoints(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder MapStoreEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/locations")
-            .WithTags("Locations");
+        var group = app.MapGroup("/api/stores")
+            .WithTags("Stores");
 
-        group.MapGet("", async (ILocationStore store) =>
-            TypedResults.Ok(await store.GetAllAsync()))
-            .WithName("GetLocations");
+        group.MapGet("", async (IStoreStore storeStore) =>
+            TypedResults.Ok(await storeStore.GetAllAsync()))
+            .WithName("GetStores");
 
-        group.MapPost("", async Task<Results<Created<Location>, ValidationProblem>> (CreateLocationRequest request, ILocationStore store) =>
+        group.MapPost("", async Task<Results<Created<Store>, ValidationProblem>> (CreateStoreRequest request, IStoreStore storeStore) =>
         {
-            var errors = await ValidateRequest(request, store);
+            var errors = await ValidateRequest(request, storeStore);
 
             if (errors.Count > 0)
             {
                 return TypedResults.ValidationProblem(errors);
             }
 
-            var location = await store.AddAsync(request);
-            return TypedResults.Created($"/api/locations/{Uri.EscapeDataString(location.Id)}", location);
+            var createdStore = await storeStore.AddAsync(request);
+            return TypedResults.Created($"/api/stores/{Uri.EscapeDataString(createdStore.Id)}", createdStore);
         })
-        .WithName("CreateLocation");
+        .WithName("CreateStore");
 
         return app;
     }
 
-    private static async Task<Dictionary<string, string[]>> ValidateRequest(CreateLocationRequest request, ILocationStore store)
+    private static async Task<Dictionary<string, string[]>> ValidateRequest(CreateStoreRequest request, IStoreStore store)
     {
         var errors = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
         var trimmedId = request.Id?.Trim() ?? string.Empty;

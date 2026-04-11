@@ -1,16 +1,16 @@
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 
-namespace JokeSubs.Server.Locations;
+namespace JokeSubs.Server.Stores;
 
-public sealed class CosmosLocationStore : ILocationStore
+public sealed class CosmosStoreStore : IStoreStore
 {
     private readonly Container _container;
 
-    public CosmosLocationStore(CosmosClient cosmosClient, IConfiguration configuration)
+    public CosmosStoreStore(CosmosClient cosmosClient, IConfiguration configuration)
     {
-        var databaseName = configuration["LOCATIONS_DATABASENAME"];
-        var containerName = configuration["LOCATIONS_CONTAINERNAME"];
+        var databaseName = configuration["STORES_DATABASENAME"];
+        var containerName = configuration["STORES_CONTAINERNAME"];
 
         if (string.IsNullOrWhiteSpace(databaseName) || string.IsNullOrWhiteSpace(containerName))
         {
@@ -22,12 +22,12 @@ public sealed class CosmosLocationStore : ILocationStore
         _container = cosmosClient.GetContainer(databaseName, containerName);
     }
 
-    public async Task<IReadOnlyList<Location>> GetAllAsync()
+    public async Task<IReadOnlyList<Store>> GetAllAsync()
     {
         var query = new QueryDefinition("SELECT c.id, c.name FROM c");
-        var results = new List<Location>();
+        var results = new List<Store>();
 
-        using var feed = _container.GetItemQueryIterator<Location>(query);
+        using var feed = _container.GetItemQueryIterator<Store>(query);
         while (feed.HasMoreResults)
         {
             var page = await feed.ReadNextAsync();
@@ -60,10 +60,10 @@ public sealed class CosmosLocationStore : ILocationStore
         return false;
     }
 
-    public async Task<Location> AddAsync(CreateLocationRequest request)
+    public async Task<Store> AddAsync(CreateStoreRequest request)
     {
-        var location = new Location(request.Id.Trim(), request.Name.Trim());
-        await _container.CreateItemAsync(location, new PartitionKey(location.Id));
-        return location;
+        var store = new Store(request.Id.Trim(), request.Name.Trim());
+        await _container.CreateItemAsync(store, new PartitionKey(store.Id));
+        return store;
     }
 }

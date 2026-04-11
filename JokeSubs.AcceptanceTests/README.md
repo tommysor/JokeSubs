@@ -12,7 +12,7 @@ Adapters translate between the test DSL and actual system interactions:
 - **PlaywrightAcceptanceAdapter**: Interacts with the system via the web UI using Playwright
 
 ### Layer 2: DSL (Domain-Specific Language)
-The `LocationScenarioDsl` class provides fluent Given/When/Then methods for test scenarios:
+The `StoreScenarioDsl` class provides fluent Given/When/Then methods for test scenarios:
 - `Given` methods set up test preconditions
 - `When` methods perform actions
 - `Then` methods verify outcomes
@@ -20,7 +20,7 @@ The `LocationScenarioDsl` class provides fluent Given/When/Then methods for test
 All DSL operations are adapter-agnostic and work with any adapter.
 
 ### Layer 3: Specs
-Test specifications in `/Specs/Locations/LocationAcceptanceSpecs.cs` define acceptance scenarios using the DSL. Each test uses `[Theory]` with `[MemberData]` to automatically run against selected adapters.
+Test specifications in `/Specs/Stores/StoreAcceptanceSpecs.cs` define acceptance scenarios using the DSL. Each test uses `[Theory]` with `[MemberData]` to automatically run against selected adapters.
 
 ## Assembly Fixture
 
@@ -43,7 +43,7 @@ dotnet test JokeSubs.AcceptanceTests --list-tests
 
 ### Run by Name Filter
 ```bash
-dotnet test JokeSubs.AcceptanceTests --filter "CreateLocationSuccessfully"
+dotnet test JokeSubs.AcceptanceTests --filter "CreateStoreSuccessfully"
 ```
 
 ### Run API Adapter Only
@@ -87,7 +87,7 @@ npx playwright install
 
 ### Add a New Spec
 
-Create a new test method in `LocationAcceptanceSpecs.cs`:
+Create a new test method in `StoreAcceptanceSpecs.cs`:
 
 ```csharp
 [Theory]
@@ -99,7 +99,7 @@ public async Task MyNewScenario(AdapterKind adapterKind)
     {
         try
         {
-            var dsl = new LocationScenarioDsl(adapter);
+            var dsl = new StoreScenarioDsl(adapter);
             
             // Given: Setup preconditions
             // When: Perform actions
@@ -115,15 +115,15 @@ public async Task MyNewScenario(AdapterKind adapterKind)
 
 ### Add DSL Methods
 
-If you need new operations, add methods to `LocationScenarioDsl`:
+If you need new operations, add methods to `StoreScenarioDsl`:
 
 ```csharp
-public async Task WhenDeleteLocationAsync(string id)
+public async Task WhenDeleteStoreAsync(string id)
 {
     // Implementation using adapter interface
 }
 
-public void ThenLocationIsDeleted(string id)
+public void ThenStoreIsDeleted(string id)
 {
     // Assertion logic
 }
@@ -187,7 +187,7 @@ catch (Exception)
 Track test execution times and add performance assertions:
 ```csharp
 var timer = Stopwatch.StartNew();
-await adapter.GetLocationsAsync();
+await adapter.GetStoresAsync();
 timer.Stop();
 Assert.True(timer.ElapsedMilliseconds < 1000, "API response too slow");
 ```
