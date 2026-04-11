@@ -11,6 +11,7 @@
         "npm audit": true,
         "npm run build": true,
         "npm run lint": true,
+        "set": true
     },
     "chat.tools.urls.autoApprove": {
         "https://aspire.dev": true,
