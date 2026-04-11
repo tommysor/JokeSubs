@@ -1,6 +1,6 @@
 namespace JokeSubs.Server.Stores;
 
-public interface IStoreStore
+public interface IStoreRepository
 {
     Task<IReadOnlyList<Store>> GetAllAsync();
 

@@ -9,11 +9,11 @@ public static class StoreEndpoints
         var group = app.MapGroup("/api/stores")
             .WithTags("Stores");
 
-        group.MapGet("", async (IStoreStore storeStore) =>
+        group.MapGet("", async (IStoreRepository storeStore) =>
             TypedResults.Ok(await storeStore.GetAllAsync()))
             .WithName("GetStores");
 
-        group.MapPost("", async Task<Results<Created<Store>, ValidationProblem>> (CreateStoreRequest request, IStoreStore storeStore) =>
+        group.MapPost("", async Task<Results<Created<Store>, ValidationProblem>> (CreateStoreRequest request, IStoreRepository storeStore) =>
         {
             var errors = await ValidateRequest(request, storeStore);
 
@@ -30,7 +30,7 @@ public static class StoreEndpoints
         return app;
     }
 
-    private static async Task<Dictionary<string, string[]>> ValidateRequest(CreateStoreRequest request, IStoreStore store)
+    private static async Task<Dictionary<string, string[]>> ValidateRequest(CreateStoreRequest request, IStoreRepository store)
     {
         var errors = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
         var trimmedId = request.Id?.Trim() ?? string.Empty;

@@ -1,13 +1,12 @@
 using Microsoft.Azure.Cosmos;
-using Microsoft.Extensions.Configuration;
 
 namespace JokeSubs.Server.Stores;
 
-public sealed class CosmosStoreStore : IStoreStore
+public sealed class StoreRepository : IStoreRepository
 {
     private readonly Container _container;
 
-    public CosmosStoreStore(CosmosClient cosmosClient, IConfiguration configuration)
+    public StoreRepository(CosmosClient cosmosClient, IConfiguration configuration)
     {
         var databaseName = configuration["STORES_DATABASENAME"];
         var containerName = configuration["STORES_CONTAINERNAME"];

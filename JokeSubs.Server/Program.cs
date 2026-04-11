@@ -18,7 +18,7 @@ builder.AddAzureCosmosClient("stores",
         };
     });
 
-builder.Services.AddSingleton<IStoreStore, CosmosStoreStore>();
+builder.Services.AddSingleton<IStoreRepository, StoreRepository>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
