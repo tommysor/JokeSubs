@@ -33,6 +33,15 @@ public class LocationAcceptanceSpecs
     public static IEnumerable<object[]> UiOnlyData =>
         new[] { new object[] { AdapterKind.Ui } };
 
+    public static IEnumerable<object?[]> InvalidNameData =>
+        new[]
+        {
+            new object?[] { AdapterKind.Api, "" },
+            new object?[] { AdapterKind.Api, "   " },
+            new object?[] { AdapterKind.Ui, "" },
+            new object?[] { AdapterKind.Ui, "   " }
+        };
+
     // ============================================================================
     // CORE HAPPY PATH TESTS (v1 scope)
     // ============================================================================
@@ -113,5 +122,37 @@ public class LocationAcceptanceSpecs
         // Then: Both locations are still visible
         dsl.ThenLocationExistsInListAsync(idA, "Location A");
         dsl.ThenLocationExistsInListAsync(idB, "Location B");
+    }
+
+    /// <summary>
+    /// Scenario: User submits a location without a name
+    /// Given: No specific setup beyond loading baseline state
+    /// When: User submits a location with a blank name
+    /// Then: Validation fails with a name error and no location is added
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(InvalidNameData))]
+    public async Task RejectsLocationCreationWhenNameIsBlank(AdapterKind adapterKind, string name)
+    {
+        var uniqueId = $"loc-name-required-{Guid.NewGuid():N}";
+        await using var dsl = await _fixture.GetLocationScenarioDsl(adapterKind);
+
+        await dsl.WhenCreateLocationAsync(uniqueId, name);
+
+        dsl.ThenLocationCreationFailedAsync();
+        dsl.ThenValidationErrorExistsForFieldAsync("name", "Name is required.");
+    }
+
+    [Theory]
+    [MemberData(nameof(ApiOnlyData))]
+    public async Task RejectsLocationCreationWhenNameIsNull(AdapterKind adapterKind)
+    {
+        var uniqueId = $"loc-name-required-{Guid.NewGuid():N}";
+        await using var dsl = await _fixture.GetLocationScenarioDsl(adapterKind);
+
+        await dsl.WhenCreateLocationAsync(uniqueId, null!);
+
+        dsl.ThenLocationCreationFailedAsync();
+        dsl.ThenValidationErrorExistsForFieldAsync("name", "Name is required.");
     }
 }
