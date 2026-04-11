@@ -201,6 +201,12 @@ function App() {
           </form>
         </section>
       </main>
+
+      <footer className="app-footer">
+        <p>
+          Icons by <a target="_blank" href="https://icons8.com" rel="noreferrer">Icons8</a>
+        </p>
+      </footer>
     </div>
   )
 }
