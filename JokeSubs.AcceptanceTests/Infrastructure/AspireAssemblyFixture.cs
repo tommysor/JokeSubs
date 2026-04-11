@@ -36,7 +36,7 @@ public sealed class AspireAssemblyFixture : IAsyncLifetime
         await _app.ResourceNotifications.WaitForResourceHealthyAsync("webfrontend", cts.Token);
 
         _apiClient = _app.CreateHttpClient("server");
-        _apiClient.Timeout = TimeSpan.FromSeconds(30);
+        _apiClient.Timeout = TimeSpan.FromSeconds(5);
 
         using var frontendClient = _app.CreateHttpClient("webfrontend");
         _uiBaseUri = frontendClient.BaseAddress
