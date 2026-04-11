@@ -13,6 +13,7 @@ RUN apt-get update \
         curl \
         git \
         jq \
+        ripgrep \
         unzip \
         libatk-bridge2.0-0 \
         libatk1.0-0 \
