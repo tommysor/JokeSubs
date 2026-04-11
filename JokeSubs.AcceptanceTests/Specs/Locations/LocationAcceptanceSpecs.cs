@@ -45,10 +45,8 @@ public class LocationAcceptanceSpecs
     {
         await using var dsl = await _fixture.GetLocationScenarioDsl(adapterKind);
 
-        // When: We load the locations
         await dsl.WhenLoadingLocationsAsync();
 
-        // Then: The location count is available and non-negative
         var count = await dsl.GetLocationCountAsync();
         Assert.True(count >= 0);
     }
@@ -60,13 +58,10 @@ public class LocationAcceptanceSpecs
         var uniqueId = $"test-hub-{Guid.NewGuid():N}";
         await using var dsl = await _fixture.GetLocationScenarioDsl(adapterKind);
 
-        // When: We create a new location
         await dsl.WhenCreateLocationAsync(uniqueId, "Test Hub 1");
 
-        // Then: The creation succeeded
         dsl.ThenLocationCreationSucceededAsync();
 
-        // And: The location now appears in the list
         await dsl.WhenLoadingLocationsAsync();
         dsl.ThenLocationExistsInListAsync(uniqueId, "Test Hub 1");
     }
@@ -79,16 +74,13 @@ public class LocationAcceptanceSpecs
         var idB = $"loc-b-{Guid.NewGuid():N}";
         await using var dsl = await _fixture.GetLocationScenarioDsl(adapterKind);
 
-        // Given: We create multiple locations
         await dsl.GivenLocationsExistAsync(
             (idA, "Location A"),
             (idB, "Location B")
         );
 
-        // When: We refresh the locations list
         await dsl.ThenRefreshLocationsAsync();
 
-        // Then: Both locations are still visible
         dsl.ThenLocationExistsInListAsync(idA, "Location A");
         dsl.ThenLocationExistsInListAsync(idB, "Location B");
     }
