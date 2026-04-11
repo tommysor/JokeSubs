@@ -1,15 +1,7 @@
-using Xunit;
-using JokeSubs.AcceptanceTests.Attributes;
-using JokeSubs.AcceptanceTests.Dsl;
 using JokeSubs.AcceptanceTests.Infrastructure;
 
 namespace JokeSubs.AcceptanceTests.Specs.Locations;
 
-/// <summary>
-/// Acceptance tests for location management features.
-/// These tests specify end-to-end scenarios in Given/When/Then format,
-/// executable against both UI and API adapters.
-/// </summary>
 public class LocationAcceptanceSpecs
 {
     private readonly AspireAssemblyFixture _fixture;
@@ -42,16 +34,6 @@ public class LocationAcceptanceSpecs
             new object?[] { AdapterKind.Ui, "   " }
         };
 
-    // ============================================================================
-    // CORE HAPPY PATH TESTS (v1 scope)
-    // ============================================================================
-
-    /// <summary>
-    /// Scenario: User loads the application and sees the locations list
-    /// Given: No previous setup
-    /// When: The locations page is loaded
-    /// Then: The active locations count is displayed
-    /// </summary>
     [Theory]
     [MemberData(nameof(AllAdaptersData))]
     public async Task LoadsLocationsOnInitialPageLoad(AdapterKind adapterKind)
@@ -69,12 +51,6 @@ public class LocationAcceptanceSpecs
         Assert.True(count >= 0);
     }
 
-    /// <summary>
-    /// Scenario: User creates a new location successfully
-    /// Given: No locations exist
-    /// When: User submits a valid location form
-    /// Then: The location appears in the list immediately
-    /// </summary>
     [Theory]
     [MemberData(nameof(AllAdaptersData))]
     public async Task CreatesLocationSuccessfully(AdapterKind adapterKind)
@@ -96,12 +72,6 @@ public class LocationAcceptanceSpecs
         dsl.ThenLocationExistsInListAsync(uniqueId, "Test Hub 1");
     }
 
-    /// <summary>
-    /// Scenario: User sees the initial location in the list (integration with Cosmos)
-    /// Given: Locations created via the API before the current session
-    /// When: The page loads
-    /// Then: The previously created locations are visible
-    /// </summary>
     [Theory]
     [MemberData(nameof(AllAdaptersData))]
     public async Task PersistsLocationsAcrossRequests(AdapterKind adapterKind)
@@ -124,12 +94,6 @@ public class LocationAcceptanceSpecs
         dsl.ThenLocationExistsInListAsync(idB, "Location B");
     }
 
-    /// <summary>
-    /// Scenario: User submits a location without a name
-    /// Given: No specific setup beyond loading baseline state
-    /// When: User submits a location with a blank name
-    /// Then: Validation fails with a name error and no location is added
-    /// </summary>
     [Theory]
     [MemberData(nameof(InvalidNameData))]
     public async Task RejectsLocationCreationWhenNameIsBlank(AdapterKind adapterKind, string name)
