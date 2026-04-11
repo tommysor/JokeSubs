@@ -12,27 +12,32 @@ public class LocationAcceptanceSpecs
     }
 
     // Theory data helpers for adapter selection
-    public static IEnumerable<object[]> AllAdaptersData =>
-        new[]
+    private static IEnumerable<object?[]> AddAllAdaptersAsFirstArg(IEnumerable<object?[]> data)
+    {
+        var adapterKinds = Enum.GetValues<AdapterKind>();
+        foreach (var adapterKind in adapterKinds)
         {
-            new object[] { AdapterKind.Api },
-            new object[] { AdapterKind.Ui }
-        };
+            foreach (var item in data)
+            {
+                var newItem = new object?[item.Length + 1];
+                newItem[0] = adapterKind;
+                Array.Copy(item, 0, newItem, 1, item.Length);
+                yield return newItem;
+            }
+        }
+    }
+
+    public static IEnumerable<object?[]> AllAdaptersData =>
+        AddAllAdaptersAsFirstArg(
+        [
+            [],
+        ]);
 
     public static IEnumerable<object[]> ApiOnlyData =>
         new[] { new object[] { AdapterKind.Api } };
 
     public static IEnumerable<object[]> UiOnlyData =>
         new[] { new object[] { AdapterKind.Ui } };
-
-    public static IEnumerable<object?[]> InvalidNameData =>
-        new[]
-        {
-            new object?[] { AdapterKind.Api, "" },
-            new object?[] { AdapterKind.Api, "   " },
-            new object?[] { AdapterKind.Ui, "" },
-            new object?[] { AdapterKind.Ui, "   " }
-        };
 
     [Theory]
     [MemberData(nameof(AllAdaptersData))]
@@ -94,8 +99,15 @@ public class LocationAcceptanceSpecs
         dsl.ThenLocationExistsInListAsync(idB, "Location B");
     }
 
+    public static IEnumerable<object?[]> RejectsLocationCreationWhenNameIsBlankData
+        => AddAllAdaptersAsFirstArg(
+        [
+            [""],
+            ["   "]
+        ]);
+
     [Theory]
-    [MemberData(nameof(InvalidNameData))]
+    [MemberData(nameof(RejectsLocationCreationWhenNameIsBlankData))]
     public async Task RejectsLocationCreationWhenNameIsBlank(AdapterKind adapterKind, string name)
     {
         var uniqueId = $"loc-name-required-{Guid.NewGuid():N}";
