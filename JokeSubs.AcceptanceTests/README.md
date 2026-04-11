@@ -63,7 +63,9 @@ dotnet test JokeSubs.AcceptanceTests -v detailed
 
 ## Browser Setup (Playwright)
 
-The first time you run UI tests, Playwright will download browsers. This is a one-time operation:
+When running inside this repository's dev container, post-create setup automatically installs the Playwright Chromium browser used by UI adapter tests.
+
+Outside the dev container, the first UI test run will download browsers. This is a one-time operation:
 
 ```bash
 dotnet test JokeSubs.AcceptanceTests

@@ -6,7 +6,7 @@ This repository supports running Aspire resources and MCP tooling from inside a 
 
 1. Open the repository in VS Code.
 2. Run "Dev Containers: Reopen in Container".
-3. Wait for post-create to finish. It installs Aspire CLI tooling and validates MCP wrappers.
+3. Wait for post-create to finish. It installs Aspire CLI tooling, waits for Docker readiness, installs Playwright browser binaries for .NET UI tests, warms up Aspire resources once, and validates MCP wrappers.
 4. Run this check manually if needed:
 
 ```bash
