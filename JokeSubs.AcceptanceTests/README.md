@@ -49,27 +49,27 @@ The `AspireAssemblyFixture` starts the Aspire AppHost once at the beginning of t
 
 ### All Tests
 ```bash
-dotnet test JokeSubs.AcceptanceTests
+dotnet test
 ```
 
 ### List Available Tests
 ```bash
-dotnet test JokeSubs.AcceptanceTests --list-tests
+dotnet test --list-tests
 ```
 
 ### Run by Name Filter
 ```bash
-dotnet test JokeSubs.AcceptanceTests --filter "CreateStoreSuccessfully"
+dotnet test --filter "CreateStoreSuccessfully"
 ```
 
 ### Run API Adapter Only
 ```bash
-dotnet test JokeSubs.AcceptanceTests --filter "DisplayName~adapterKind: Api"
+dotnet test --filter "DisplayName~adapterKind: Api"
 ```
 
 ### Run UI Adapter Only
 ```bash
-dotnet test JokeSubs.AcceptanceTests --filter "DisplayName~adapterKind: Ui"
+dotnet test --filter "DisplayName~adapterKind: Ui"
 ```
 
 ### Verbose Output

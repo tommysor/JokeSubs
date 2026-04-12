@@ -193,28 +193,6 @@ Test Method Called
                         └─ Validates {id, name} in list
 ```
 
-## Test Adapter Filtering
-
-### Run All Tests
-```bash
-dotnet test JokeSubs.AcceptanceTests
-# Runs the full acceptance suite across all configured adapters
-```
-
-### Run API Only
-```bash
-dotnet test JokeSubs.AcceptanceTests --filter "DisplayName~adapterKind: Api"
-# Runs: 3 tests (3 scenarios × API only)
-# Useful for: Fast API-only validation, CI pre-checks
-```
-
-### Run UI Only
-```bash
-dotnet test JokeSubs.AcceptanceTests --filter "DisplayName~adapterKind: Ui"
-# Runs: 3 tests (3 scenarios × UI only)
-# Useful for: UI-specific debugging, browser testing
-```
-
 ## Extensibility
 
 ### Adding a New Scenario
