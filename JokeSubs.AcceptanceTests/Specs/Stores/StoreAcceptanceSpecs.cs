@@ -119,6 +119,7 @@ public class StoreAcceptanceSpecs
         dsl.ThenValidationErrorExistsForFieldAsync("name", "Name is required.");
     }
 
+    // ApiOnly because UI doesn't allow submitting null name, but API can receive it.
     [Theory]
     [MemberData(nameof(ApiOnlyData))]
     public async Task RejectsStoreCreationWhenNameIsNull(AdapterKind adapterKind)
