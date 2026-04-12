@@ -1,34 +1,35 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { createStore, getStores, type ApiValidationError } from './storesApi'
 import type { CreateStoreInput, Store } from './types'
 
 function StoresPage() {
-  const [stores, setStores] = useState<Store[]>([])
+  const queryClient = useQueryClient()
   const [formData, setFormData] = useState<CreateStoreInput>({ id: '', name: '' })
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof CreateStoreInput, string>>>({})
-  const [loadError, setLoadError] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
 
-  useEffect(() => {
-    void loadStores()
-  }, [])
+  const {
+    data: stores = [],
+    isPending: isLoading,
+    isError: isLoadError,
+    refetch,
+  } = useQuery({
+    queryKey: ['stores'],
+    queryFn: getStores,
+    select: sortStores,
+  })
 
-  async function loadStores() {
-    setIsLoading(true)
-    setLoadError(null)
-
-    try {
-      const nextStores = await getStores()
-      setStores(nextStores)
-    } catch {
-      setLoadError('Unable to load stores right now.')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const createStoreMutation = useMutation({
+    mutationFn: createStore,
+    onSuccess: (createdStore) => {
+      queryClient.setQueryData<Store[]>(['stores'], (currentStores) => {
+        const nextStores = currentStores ? [...currentStores, createdStore] : [createdStore]
+        return sortStores(nextStores)
+      })
+    },
+  })
 
   function handleChange(field: keyof CreateStoreInput, value: string) {
     setFormData((current) => ({ ...current, [field]: value }))
@@ -62,23 +63,10 @@ function StoresPage() {
       return
     }
 
-    setIsSaving(true)
     setSubmitError(null)
 
-    try {
-      const createdStore = await createStore(formData)
-
-      setStores((current) => {
-        const nextStores = [...current, createdStore]
-        return nextStores.sort((left, right) => {
-          const nameComparison = left.name.localeCompare(right.name)
-          if (nameComparison !== 0) {
-            return nameComparison
-          }
-
-          return left.id.localeCompare(right.id)
-        })
-      })
+    try { 
+      await createStoreMutation.mutateAsync(formData)
       setFormData({ id: '', name: '' })
       setFieldErrors({})
     } catch (error) {
@@ -93,8 +81,6 @@ function StoresPage() {
       } else {
         setSubmitError('Unable to save the store right now.')
       }
-    } finally {
-      setIsSaving(false)
     }
   }
 
@@ -121,12 +107,12 @@ function StoresPage() {
               <p className="panel-kicker">Directory</p>
               <h2 id="stores-heading" className="panel-title">Store list</h2>
             </div>
-            <button className="ghost-button" type="button" onClick={() => void loadStores()} disabled={isLoading}>
+            <button className="ghost-button" type="button" onClick={() => void refetch()} disabled={isLoading}>
               Refresh
             </button>
           </div>
 
-          {loadError ? <p className="banner banner-error">{loadError}</p> : null}
+          {isLoadError ? <p className="banner banner-error">Unable to load stores right now.</p> : null}
 
           {isLoading ? (
             <div className="empty-state" role="status" aria-live="polite">
@@ -195,8 +181,8 @@ function StoresPage() {
 
             {submitError ? <p className="banner banner-error">{submitError}</p> : null}
 
-            <button className="primary-button" type="submit" disabled={isSaving}>
-              {isSaving ? 'Saving...' : 'Add store'}
+            <button className="primary-button" type="submit" disabled={createStoreMutation.isPending}>
+              {createStoreMutation.isPending ? 'Saving...' : 'Add store'}
             </button>
           </form>
         </section>
@@ -207,6 +193,17 @@ function StoresPage() {
 
 function isApiValidationError(error: unknown): error is ApiValidationError {
   return typeof error === 'object' && error !== null && 'errors' in error
+}
+
+function sortStores(stores: Store[]) {
+  return [...stores].sort((left, right) => {
+    const nameComparison = left.name.localeCompare(right.name)
+    if (nameComparison !== 0) {
+      return nameComparison
+    }
+
+    return left.id.localeCompare(right.id)
+  })
 }
 
 export default StoresPage
