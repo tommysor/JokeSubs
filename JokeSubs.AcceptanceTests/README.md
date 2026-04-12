@@ -64,12 +64,12 @@ dotnet test JokeSubs.AcceptanceTests --filter "CreateStoreSuccessfully"
 
 ### Run API Adapter Only
 ```bash
-dotnet test JokeSubs.AcceptanceTests --filter "Api)"
+dotnet test JokeSubs.AcceptanceTests --filter "DisplayName~adapterKind: Api"
 ```
 
 ### Run UI Adapter Only
 ```bash
-dotnet test JokeSubs.AcceptanceTests --filter "Ui)"
+dotnet test JokeSubs.AcceptanceTests --filter "DisplayName~adapterKind: Ui"
 ```
 
 ### Verbose Output

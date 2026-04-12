@@ -203,14 +203,14 @@ dotnet test JokeSubs.AcceptanceTests
 
 ### Run API Only
 ```bash
-dotnet test JokeSubs.AcceptanceTests --filter "Api)"
+dotnet test JokeSubs.AcceptanceTests --filter "DisplayName~adapterKind: Api"
 # Runs: 3 tests (3 scenarios × API only)
 # Useful for: Fast API-only validation, CI pre-checks
 ```
 
 ### Run UI Only
 ```bash
-dotnet test JokeSubs.AcceptanceTests --filter "Ui)"
+dotnet test JokeSubs.AcceptanceTests --filter "DisplayName~adapterKind: Ui"
 # Runs: 3 tests (3 scenarios × UI only)
 # Useful for: UI-specific debugging, browser testing
 ```
