@@ -64,7 +64,7 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
                 var name = await nameEl.TextContentAsync() ?? "";
                 var id = await idEl.TextContentAsync() ?? "";
 
-                stores.Add(new StoreItem(id.Trim(), name.Trim()));
+                stores.Add(new StoreItem(id.Trim(), name.Trim(), []));
             }
         }
 
@@ -167,6 +167,18 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
         return await ReadSelectedStoreAsync();
     }
 
+    public async Task<StoreItem?> AddGroupToStoreAsync(string storeId, string groupName)
+    {
+        await _page.GotoAsync($"/stores/{Uri.EscapeDataString(storeId)}");
+        await _page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        await _page.GetByLabel("Group name").FillAsync(groupName);
+        await _page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Add group" }).ClickAsync();
+        await _page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        return await ReadSelectedStoreAsync();
+    }
+
     public async ValueTask DisposeAsync()
     {
         await _page.CloseAsync();
@@ -218,6 +230,18 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
             return null;
         }
 
-        return new StoreItem(id, name);
+        var groups = new List<GroupItem>();
+        var groupPills = _page.Locator(".group-pill");
+        var groupCount = await groupPills.CountAsync();
+        for (var i = 0; i < groupCount; i++)
+        {
+            var groupName = (await groupPills.Nth(i).TextContentAsync())?.Trim();
+            if (!string.IsNullOrEmpty(groupName))
+            {
+                groups.Add(new GroupItem(groupName));
+            }
+        }
+
+        return new StoreItem(id, name, groups);
     }
 }

@@ -94,6 +94,23 @@ public class ApiAcceptanceAdapter : IAcceptanceAdapter
             ?? throw new InvalidOperationException("Failed to deserialize store from API response");
     }
 
+    public async Task<StoreItem?> AddGroupToStoreAsync(string storeId, string groupName)
+    {
+        var payload = new { name = groupName };
+        var response = await _client.PostAsJsonAsync($"/api/stores/{Uri.EscapeDataString(storeId)}/groups", payload);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<StoreItem>(content, JsonOptions)
+            ?? throw new InvalidOperationException("Failed to deserialize updated store from API response");
+    }
+
     public ValueTask DisposeAsync()
     {
         // HttpClient is managed by the fixture, no per-adapter cleanup needed

@@ -46,6 +46,11 @@ public class StoreScenarioDsl : IAsyncDisposable
         _selectedStore = await _adapter.OpenStoreAsync(id);
     }
 
+    public async Task WhenAddingGroupToStoreAsync(string id, string groupName)
+    {
+        _selectedStore = await _adapter.AddGroupToStoreAsync(id, groupName);
+    }
+
     // ==================== THEN ====================
 
     public Task<int> GetStoreCountAsync()
@@ -110,6 +115,24 @@ public class StoreScenarioDsl : IAsyncDisposable
         {
             throw new AssertionException(
                 $"Expected selected store {id} ({name}) but got {_selectedStore.Id} ({_selectedStore.Name})");
+        }
+    }
+
+    public void ThenStoreContainsGroupAsync(string groupName)
+    {
+        if (_selectedStore == null)
+        {
+            throw new AssertionException(
+                $"Expected selected store to contain group '{groupName}' but no store details were loaded");
+        }
+
+        var found = _selectedStore.Groups.Any(group =>
+            group.Name.Equals(groupName, StringComparison.OrdinalIgnoreCase));
+
+        if (!found)
+        {
+            throw new AssertionException(
+                $"Expected selected store to contain group '{groupName}' but it was not found");
         }
     }
 

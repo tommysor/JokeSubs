@@ -9,4 +9,6 @@ public interface IStoreRepository
     Task<bool> ExistsAsync(string id);
 
     Task<Store> AddAsync(CreateStoreRequest request);
+
+    Task<Store?> AddGroupAsync(string storeId, AddStoreGroupRequest request);
 }

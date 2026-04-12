@@ -3,7 +3,12 @@ namespace JokeSubs.AcceptanceTests.Infrastructure;
 /// <summary>
 /// Represents a store record as returned by the API.
 /// </summary>
-public record StoreItem(string Id, string Name);
+public record GroupItem(string Name);
+
+/// <summary>
+/// Represents a store record as returned by the API.
+/// </summary>
+public record StoreItem(string Id, string Name, IReadOnlyList<GroupItem> Groups);
 
 /// <summary>
 /// Represents validation errors returned by the API during store creation.
@@ -49,4 +54,9 @@ public interface IAcceptanceAdapter : IAsyncDisposable
     /// Opens a store and returns the selected store details.
     /// </summary>
     Task<StoreItem?> OpenStoreAsync(string id);
+
+    /// <summary>
+    /// Adds a group to a store and returns the updated store details.
+    /// </summary>
+    Task<StoreItem?> AddGroupToStoreAsync(string storeId, string groupName);
 }

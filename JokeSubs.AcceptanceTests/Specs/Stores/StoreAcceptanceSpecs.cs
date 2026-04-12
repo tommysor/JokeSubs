@@ -99,6 +99,20 @@ public class StoreAcceptanceSpecs
         dsl.ThenStoreDetailsMatchAsync(uniqueId, "Open Store");
     }
 
+    [Theory]
+    [MemberData(nameof(AllAdaptersData))]
+    public async Task AddsGroupToStore(AdapterKind adapterKind)
+    {
+        var uniqueId = $"group-store-{Guid.NewGuid():N}";
+        await using var dsl = await _fixture.GetStoreScenarioDsl(adapterKind);
+
+        await dsl.GivenStoresExistAsync((uniqueId, "Group Store"));
+
+        await dsl.WhenAddingGroupToStoreAsync(uniqueId, "Monthly Members");
+
+        dsl.ThenStoreContainsGroupAsync("Monthly Members");
+    }
+
     public static IEnumerable<object?[]> RejectsStoreCreationWhenNameIsBlankData
         => AddAllAdaptersAsFirstArg(
         [

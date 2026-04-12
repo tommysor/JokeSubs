@@ -1,4 +1,4 @@
-import type { CreateStoreInput, Store } from './types'
+import type { AddStoreGroupInput, CreateStoreInput, Store } from './types'
 
 export type ApiValidationError = {
   title?: string
@@ -57,4 +57,30 @@ export async function createStore(input: CreateStoreInput): Promise<Store> {
   }
 
   throw new Error('Failed to create store.')
+}
+
+export async function addStoreGroup(storeId: string, input: AddStoreGroupInput): Promise<Store> {
+  const response = await fetch(`/api/stores/${encodeURIComponent(storeId)}/groups`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name: input.name.trim(),
+    }),
+  })
+
+  if (response.ok) {
+    return response.json() as Promise<Store>
+  }
+
+  if (response.status === 404) {
+    throw new StoreNotFoundError(storeId)
+  }
+
+  if (response.status === 400) {
+    throw (await response.json()) as ApiValidationError
+  }
+
+  throw new Error('Failed to add group.')
 }

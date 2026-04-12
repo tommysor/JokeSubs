@@ -80,8 +80,31 @@ public sealed class StoreRepository : IStoreRepository
 
     public async Task<Store> AddAsync(CreateStoreRequest request)
     {
-        var store = new Store(request.Id.Trim(), request.Name.Trim());
+        var store = new Store
+        {
+            Id = request.Id.Trim(),
+            Name = request.Name.Trim(),
+            Groups = []
+        };
+
         await _container.CreateItemAsync(store, new PartitionKey(store.Id));
         return store;
+    }
+
+    public async Task<Store?> AddGroupAsync(string storeId, AddStoreGroupRequest request)
+    {
+        var store = await GetByIdAsync(storeId);
+        if (store is null)
+        {
+            return null;
+        }
+
+        var updatedStore = store with
+        {
+            Groups = [.. store.Groups, new StoreGroup(request.Name.Trim())]
+        };
+
+        await _container.ReplaceItemAsync(updatedStore, updatedStore.Id, new PartitionKey(updatedStore.Id));
+        return updatedStore;
     }
 }
