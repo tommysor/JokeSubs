@@ -4,6 +4,39 @@
 
 The JokeSubs acceptance test project (`JokeSubs.AcceptanceTests`) implements a three-layer, adapter-based testing architecture that enables Given/When/Then style acceptance tests to run against both HTTP API and web UI transports without test code duplication.
 
+## Core Testing Principles
+
+### Features Over Transports
+
+Acceptance tests model product behavior. The API and UI are different transports for the same feature, not separate features.
+
+This means:
+- Write one scenario per feature.
+- Run it across adapters using `AllAdaptersData` by default.
+- Only split to `ApiOnlyData` or `UiOnlyData` when the behavior itself is transport-specific. This split needs to have a comment explaining why the test must be transport spesific.
+
+### Intent-Based DSL and Adapter Contracts
+
+DSL methods and adapter interfaces should express feature intent, not transport mechanics.
+
+Prefer:
+- `WhenOpeningStoreAsync`
+- `OpenStoreAsync`
+
+Avoid:
+- transport-specific feature names when the user-facing behavior is the same across adapters.
+
+Transport-specific details belong inside adapters.
+
+### UI Selector Strategy
+
+UI adapter selectors should follow this order of preference:
+
+1. Visible user-facing text or labels
+2. Scoped locators within the relevant UI region
+3. Structural selectors when needed for precision
+4. Hidden attributes only when no good user-facing locator exists. If no good user-facing locator exists, this is an indication that it is difficult for a user to use. Evaluate updating the UI to clarify for the user, and therefore providing a good user-facing locator.
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    Spec Tests Layer                         │
@@ -67,7 +100,7 @@ The JokeSubs acceptance test project (`JokeSubs.AcceptanceTests`) implements a t
 **IAcceptanceAdapter** (`Infrastructure/IAcceptanceAdapter.cs`)
 - Contract defining operations all adapters must support
 - Exposes `StoreItem`, `ValidationErrorResult`, `CreateStoreResult` domain models
-- Adapter kind enumeration: `AdapterKind.Api`, `AdapterKind.Ui`, `AdapterKind.All`
+- Adapter kind enumeration: `AdapterKind.Api`, `AdapterKind.Ui`
 
 **ApiAcceptanceAdapter** (`Adapters/Api/ApiAcceptanceAdapter.cs`)
 - Uses HttpClient to call `/api/stores` endpoints
@@ -82,21 +115,18 @@ The JokeSubs acceptance test project (`JokeSubs.AcceptanceTests`) implements a t
 - Simulates user interactions (fill, click, wait)
 - Parses UI state and error messages
 
-**AdapterFactory** (`Infrastructure/AdapterFactory.cs`)
-- Factory for creating adapter instances
-- Routes `AdapterKind` to correct adapter implementation
-- Supports multiple adapters per test run for comparative verification
-
 ### 3. DSL Layer
 
 **StoreScenarioDsl** (`Dsl/StoreScenarioDsl.cs`)
 - Fluent Given/When/Then operations
-- Maintains scenario state (`_currentStores`, `_lastCreateResult`)
+- Maintains scenario state (`_currentStores`, `_lastCreateResult`, `_selectedStore`)
 - Methods use generic `IAcceptanceAdapter` interface, no adapter knowledge
 - Examples:
-  - `GivenNoStoresExistAsync()`
+   - `GivenStoresExistAsync(...)`
   - `WhenCreateStoreAsync(id, name)`
+   - `WhenOpeningStoreAsync(id)`
   - `ThenStoreExistsInListAsync(id, name)`
+   - `ThenStoreDetailsMatchAsync(id, name)`
   - `ThenValidationErrorExistsForFieldAsync(fieldName, message)`
 
 ### 4. Spec Layer
@@ -105,9 +135,9 @@ The JokeSubs acceptance test project (`JokeSubs.AcceptanceTests`) implements a t
 - Test class decorated with `[Collection("Aspire")]` to use assembly fixture
 - Receives `AspireAssemblyFixture` via constructor injection
 - Test methods use `[Theory]` with `[MemberData]` for adapter selection
-- Data sources: `AllAdaptersData`, `ApiOnlyData`, `UiOnlyData`
-- Each test method creates adapters, wraps them in DSL, executes scenario
-- Current v1 scope: 3 scenarios × 2 adapters = 6 tests
+- Default data source is `AllAdaptersData`; `ApiOnlyData` and `UiOnlyData` are reserved for transport-specific behavior
+- Each test method requests one DSL from the fixture, then executes the same scenario through the selected adapter
+- Current suite includes cross-adapter feature scenarios plus a small number of API-only validation cases
 
 ## Data Flow
 
@@ -125,11 +155,11 @@ The JokeSubs acceptance test project (`JokeSubs.AcceptanceTests`) implements a t
    └─ Fixture cleanup after all tests complete
 
 3. Test method executes with AdapterKind parameter
-   ├─ Creates adapter(s) via AdapterFactory
-   ├─ Wraps adapter(s) in StoreScenarioDsl
+   ├─ Requests a DSL via fixture.GetStoreScenarioDsl(adapterKind)
+   ├─ Fixture creates the matching adapter implementation
    ├─ Executes Given/When/Then operations
    ├─ Adapter translates to API or UI calls
-   └─ Adapter disposes resources after test
+   └─ DSL disposes the adapter after test
 
 4. Scenarios execute identically on both adapters
    ├─ DSL ensures same preconditions / actions / assertions
@@ -143,15 +173,10 @@ The JokeSubs acceptance test project (`JokeSubs.AcceptanceTests`) implements a t
 Test Method Called
   └─ AdapterKind.Api passed as parameter
      │
-     └─ AdapterFactory.CreateAdaptersAsync(AdapterKind.Api)
+     └─ fixture.GetStoreScenarioDsl(AdapterKind.Api)
         └─ Creates ApiAcceptanceAdapter with fixture.ApiClient
            │
            └─ StoreScenarioDsl wraps adapter
-              │
-              ├─ Given: GivenNoStoresExistAsync()
-              │     └─ adapter.GetStoresAsync()
-              │        └─ HTTP GET /api/stores
-              │           └─ Parses JSON, asserts empty list
               │
               ├─ When: CreateStoreAsync("test-hub-1", "Test Hub 1")
               │     └─ adapter.CreateStoreAsync(id, name)
@@ -173,7 +198,7 @@ Test Method Called
 ### Run All Tests
 ```bash
 dotnet test JokeSubs.AcceptanceTests
-# Runs: 6 tests (3 scenarios × 2 adapters)
+# Runs the full acceptance suite across all configured adapters
 ```
 
 ### Run API Only
@@ -195,9 +220,10 @@ dotnet test JokeSubs.AcceptanceTests --filter "Ui)"
 ### Adding a New Scenario
 
 1. Add test method to `StoreAcceptanceSpecs`
-2. Use `[Theory]` and `[MemberData(nameof(AllAdaptersData))]` (or API/UI variants)
+2. Use `[Theory]` and `[MemberData(nameof(AllAdaptersData))]` by default
 3. Call DSL methods; adapters handle the transport details
 4. No adapter-specific code in spec
+5. Only use adapter-specific data when the behavior is transport-specific
 
 ### Adding a New DSL Operation
 
@@ -209,8 +235,8 @@ dotnet test JokeSubs.AcceptanceTests --filter "Ui)"
 
 1. Implement `IAcceptanceAdapter`
 2. Provide same operations as API and UI adapters
-3. Update `AdapterFactory.CreateAdaptersAsync()` to instantiate new adapter
-4. Update `IAcceptanceAdapter.Kind` with new `AdapterKind` flag value
+3. Update `AspireAssemblyFixture.GetStoreScenarioDsl()` to instantiate the new adapter
+4. Add the new `AdapterKind` value
 5. All existing specs run automatically on new adapter
 
 ## V1 Scope & Future Work

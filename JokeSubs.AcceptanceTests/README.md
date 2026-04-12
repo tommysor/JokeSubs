@@ -22,6 +22,22 @@ All DSL operations are adapter-agnostic and work with any adapter.
 ### Layer 3: Specs
 Test specifications in `/Specs/Stores/StoreAcceptanceSpecs.cs` define acceptance scenarios using the DSL. Each test uses `[Theory]` with `[MemberData]` to automatically run against selected adapters.
 
+## Acceptance Test Principles
+
+Acceptance tests describe product features, not transport-specific implementations.
+
+- The API and UI are different ways to use the same feature.
+- A feature scenario should usually be written once and run against all adapters with `AllAdaptersData`.
+- Use adapter-specific data such as `ApiOnlyData` or `UiOnlyData` only when the behavior is truly transport-specific. Document the reason with a comment.
+- Name DSL operations in user terms, such as `WhenOpeningStoreAsync`, rather than transport terms.
+- Keep transport details inside adapters. Specs and DSL should describe intent, not HTTP or DOM mechanics.
+
+For UI adapters:
+- Prefer selectors based on visible text or user-observable labels.
+- Scope selectors to the relevant region or row before clicking.
+- Avoid coupling tests to hidden attributes when a user-visible locator is available.
+If a user-visible locator is not available, check why. This is likely indication that UI is not clear to user.
+
 ## Assembly Fixture
 
 The `AspireAssemblyFixture` starts the Aspire AppHost once at the beginning of the test assembly and keeps it running for all tests. This ensures:
@@ -87,51 +103,46 @@ npx playwright install
 
 ### Add a New Spec
 
-Create a new test method in `StoreAcceptanceSpecs.cs`:
+Default to one feature scenario that runs against all adapters:
 
 ```csharp
 [Theory]
-[MemberData(nameof(AllAdaptersData))]  // Runs on both API and UI
-public async Task MyNewScenario(AdapterKind adapterKind)
+[MemberData(nameof(AllAdaptersData))]
+public async Task OpensStore(AdapterKind adapterKind)
 {
-    var adapters = await new AdapterFactory(_fixture).CreateAdaptersAsync(adapterKind);
-    foreach (var adapter in adapters)
-    {
-        try
-        {
-            var dsl = new StoreScenarioDsl(adapter);
-            
-            // Given: Setup preconditions
-            // When: Perform actions
-            // Then: Verify outcomes
-        }
-        finally
-        {
-            await adapter.DisposeAsync();
-        }
-    }
+    var uniqueId = $"open-store-{Guid.NewGuid():N}";
+    await using var dsl = await _fixture.GetStoreScenarioDsl(adapterKind);
+
+    await dsl.GivenStoresExistAsync((uniqueId, "Open Store"));
+
+    await dsl.WhenOpeningStoreAsync(uniqueId);
+
+    dsl.ThenStoreDetailsMatchAsync(uniqueId, "Open Store");
 }
 ```
 
+Use `ApiOnlyData` or `UiOnlyData` only if the scenario is genuinely specific to one transport.
+
 ### Add DSL Methods
 
-If you need new operations, add methods to `StoreScenarioDsl`:
+When adding a new DSL operation:
+
+- Name it after the user-visible feature or action.
+- Do not create separate DSL methods for API and UI versions of the same behavior.
+- Add one adapter contract operation for the feature intent, and let each adapter implement it in its own transport-specific way.
+
+Example:
 
 ```csharp
-public async Task WhenDeleteStoreAsync(string id)
+public async Task WhenOpeningStoreAsync(string id)
 {
-    // Implementation using adapter interface
-}
-
-public void ThenStoreIsDeleted(string id)
-{
-    // Assertion logic
+    _selectedStore = await _adapter.OpenStoreAsync(id);
 }
 ```
 
 ### Adapter-Specific Tests
 
-Run a test only against the API adapter:
+Use adapter-specific data only when the behavior is actually transport-specific. For example, a validation rule exposed only through the API surface may use `ApiOnlyData`:
 ```csharp
 public static IEnumerable<object[]> ApiOnlyData => 
     new[] { new object[] { AdapterKind.Api } };
@@ -171,7 +182,7 @@ If these ports are in use, tests will fail. Kill conflicting processes or adjust
 Expand test coverage by adding error cases, edge cases, and integration paths:
 - Validation error scenarios (duplicate ID, short ID, required fields)
 - Concurrent operations
-- API and UI interaction combinations
+- Additional feature scenarios that run through all adapters
 
 ### Enhanced Diagnostics
 Add screenshot and log capture for failed UI tests:
