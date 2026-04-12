@@ -74,7 +74,7 @@ dotnet test JokeSubs.AcceptanceTests --filter "DisplayName~adapterKind: Ui"
 
 ### Verbose Output
 ```bash
-dotnet test JokeSubs.AcceptanceTests -v detailed
+dotnet test --logger "console;verbosity=detailed"
 ```
 
 ## Browser Setup (Playwright)
