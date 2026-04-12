@@ -45,4 +45,8 @@ public interface IAcceptanceAdapter : IAsyncDisposable
     /// </summary>
     Task<int> GetStoreCountAsync();
 
+    /// <summary>
+    /// Opens a store and returns the selected store details.
+    /// </summary>
+    Task<StoreItem?> OpenStoreAsync(string id);
 }

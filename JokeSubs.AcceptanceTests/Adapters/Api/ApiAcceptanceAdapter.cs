@@ -78,6 +78,22 @@ public class ApiAcceptanceAdapter : IAcceptanceAdapter
         return stores.Count;
     }
 
+    public async Task<StoreItem?> OpenStoreAsync(string id)
+    {
+        var response = await _client.GetAsync($"/api/stores/{Uri.EscapeDataString(id)}");
+
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<StoreItem>(content, JsonOptions)
+            ?? throw new InvalidOperationException("Failed to deserialize store from API response");
+    }
+
     public ValueTask DisposeAsync()
     {
         // HttpClient is managed by the fixture, no per-adapter cleanup needed

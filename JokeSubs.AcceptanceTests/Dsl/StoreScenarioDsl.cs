@@ -11,6 +11,7 @@ public class StoreScenarioDsl : IAsyncDisposable
     private readonly IAcceptanceAdapter _adapter;
     private List<StoreItem>? _currentStores;
     private CreateStoreResult? _lastCreateResult;
+    private StoreItem? _selectedStore;
 
     public StoreScenarioDsl(IAcceptanceAdapter adapter)
     {
@@ -38,6 +39,11 @@ public class StoreScenarioDsl : IAsyncDisposable
     public async Task WhenCreateStoreAsync(string id, string name)
     {
         _lastCreateResult = await _adapter.CreateStoreAsync(id, name);
+    }
+
+    public async Task WhenOpeningStoreAsync(string id)
+    {
+        _selectedStore = await _adapter.OpenStoreAsync(id);
     }
 
     // ==================== THEN ====================
@@ -89,6 +95,21 @@ public class StoreScenarioDsl : IAsyncDisposable
         {
             throw new AssertionException(
                 $"Expected store {id} to not exist but it was found");
+        }
+    }
+
+    public void ThenStoreDetailsMatchAsync(string id, string name)
+    {
+        if (_selectedStore == null)
+        {
+            throw new AssertionException(
+                $"Expected store {id} ({name}) to be selected but no store details were loaded");
+        }
+
+        if (!_selectedStore.Id.Equals(id, StringComparison.OrdinalIgnoreCase) || _selectedStore.Name != name)
+        {
+            throw new AssertionException(
+                $"Expected selected store {id} ({name}) but got {_selectedStore.Id} ({_selectedStore.Name})");
         }
     }
 

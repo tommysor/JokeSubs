@@ -9,12 +9,14 @@ namespace JokeSubs.AcceptanceTests.Adapters.Ui;
 /// </summary>
 public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
 {
+    private readonly string _baseUri;
     private readonly IPage _page;
     private readonly IBrowser _browser;
     private readonly IPlaywright _playwrightInstance;
 
-    private PlaywrightAcceptanceAdapter(IPage page, IBrowser browser, IPlaywright playwright)
+    private PlaywrightAcceptanceAdapter(string baseUri, IPage page, IBrowser browser, IPlaywright playwright)
     {
+        _baseUri = baseUri;
         _page = page;
         _browser = browser;
         _playwrightInstance = playwright;
@@ -35,7 +37,7 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
         var page = await browser.NewPageAsync();
         await page.GotoAsync(baseUri);
 
-        return new PlaywrightAcceptanceAdapter(page, browser, playwright);
+        return new PlaywrightAcceptanceAdapter(baseUri, page, browser, playwright);
     }
 
     public async Task<List<StoreItem>> GetStoresAsync()
@@ -148,6 +150,18 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
         throw new InvalidOperationException($"Could not parse store count: {countText}");
     }
 
+    public async Task<StoreItem?> OpenStoreAsync(string id)
+    {
+        await _page.GotoAsync(_baseUri);
+
+        // Scope lookup to visible store rows and click the row containing this store id.
+        var storeRow = _page.Locator("a.list-row").Filter(new LocatorFilterOptions { HasTextString = id });
+        await storeRow.First.WaitForAsync();
+        await storeRow.First.ClickAsync();
+
+        return await ReadSelectedStoreAsync();
+    }
+
     public async ValueTask DisposeAsync()
     {
         await _page.CloseAsync();
@@ -174,5 +188,30 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
             return null;
 
         return await errorElement.TextContentAsync();
+    }
+
+    private async Task<StoreItem?> ReadSelectedStoreAsync()
+    {
+        await _page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await _page.WaitForFunctionAsync(
+            "() => { const element = document.querySelector('.store-page-name'); return element && element.textContent !== 'Loading store...'; }");
+
+        var nameElement = await _page.QuerySelectorAsync(".store-page-name");
+        var idElement = await _page.QuerySelectorAsync(".store-page-id");
+
+        if (nameElement == null || idElement == null)
+        {
+            return null;
+        }
+
+        var name = (await nameElement.TextContentAsync())?.Trim();
+        var id = (await idElement.TextContentAsync())?.Trim();
+
+        if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(id))
+        {
+            return null;
+        }
+
+        return new StoreItem(id, name);
     }
 }

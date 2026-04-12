@@ -85,6 +85,20 @@ public class StoreAcceptanceSpecs
         dsl.ThenStoreExistsInListAsync(idB, "Store B");
     }
 
+    [Theory]
+    [MemberData(nameof(AllAdaptersData))]
+    public async Task OpensStore(AdapterKind adapterKind)
+    {
+        var uniqueId = $"open-store-{Guid.NewGuid():N}";
+        await using var dsl = await _fixture.GetStoreScenarioDsl(adapterKind);
+
+        await dsl.GivenStoresExistAsync((uniqueId, "Open Store"));
+
+        await dsl.WhenOpeningStoreAsync(uniqueId);
+
+        dsl.ThenStoreDetailsMatchAsync(uniqueId, "Open Store");
+    }
+
     public static IEnumerable<object?[]> RejectsStoreCreationWhenNameIsBlankData
         => AddAllAdaptersAsFirstArg(
         [

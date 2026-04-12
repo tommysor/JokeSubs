@@ -22,6 +22,28 @@ public sealed class StoreRepository : IStoreRepository
         _container = cosmosClient.GetContainer(databaseName, containerName);
     }
 
+    public async Task<Store?> GetByIdAsync(string id)
+    {
+        var normalizedId = id.Trim().ToLowerInvariant();
+
+        using var feed = _container.GetItemLinqQueryable<Store>()
+            .Where(store => store.Id.ToLower() == normalizedId)
+            .ToFeedIterator();
+
+        while (feed.HasMoreResults)
+        {
+            var page = await feed.ReadNextAsync();
+            var store = page.Resource.FirstOrDefault();
+
+            if (store is not null)
+            {
+                return store;
+            }
+        }
+
+        return null;
+    }
+
     public async Task<IReadOnlyList<Store>> GetAllAsync()
     {
         var results = new List<Store>();

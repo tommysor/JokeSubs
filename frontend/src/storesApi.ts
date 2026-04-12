@@ -5,6 +5,13 @@ export type ApiValidationError = {
   errors: Record<string, string[]>
 }
 
+export class StoreNotFoundError extends Error {
+  constructor(storeId: string) {
+    super(`Store '${storeId}' was not found.`)
+    this.name = 'StoreNotFoundError'
+  }
+}
+
 export async function getStores(): Promise<Store[]> {
   const response = await fetch('/api/stores')
 
@@ -13,6 +20,20 @@ export async function getStores(): Promise<Store[]> {
   }
 
   return response.json() as Promise<Store[]>
+}
+
+export async function getStoreById(storeId: string): Promise<Store> {
+  const response = await fetch(`/api/stores/${encodeURIComponent(storeId)}`)
+
+  if (response.ok) {
+    return response.json() as Promise<Store>
+  }
+
+  if (response.status === 404) {
+    throw new StoreNotFoundError(storeId)
+  }
+
+  throw new Error('Failed to load store.')
 }
 
 export async function createStore(input: CreateStoreInput): Promise<Store> {

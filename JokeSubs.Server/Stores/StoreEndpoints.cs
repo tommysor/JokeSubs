@@ -9,6 +9,13 @@ public static class StoreEndpoints
         var group = app.MapGroup("/api/stores")
             .WithTags("Stores");
 
+        group.MapGet("/{id}", async Task<Results<Ok<Store>, NotFound>> (string id, IStoreRepository storeRepository) =>
+        {
+            var store = await storeRepository.GetByIdAsync(id);
+            return store is null ? TypedResults.NotFound() : TypedResults.Ok(store);
+        })
+        .WithName("GetStoreById");
+
         group.MapGet("", async (IStoreRepository storeStore) =>
             TypedResults.Ok(await storeStore.GetAllAsync()))
             .WithName("GetStores");
