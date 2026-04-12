@@ -26,8 +26,11 @@
         "https://code.visualstudio.com": true,
         "https://github.com/microsoft/*": true,
         "https://github.com/dotnet/*": true,
+        "https://github.com/tanstack/*": true,
         "https://learn.microsoft.com": true,
+        "https://www.npmjs.com": true,
         "https://www.nuget.org": true,
+        "https://registry.npmjs.org": true,
         "https://xunit.net": true
     },
     "dotnetAcquisitionExtension.existingDotnetPath": [
