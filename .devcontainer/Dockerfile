@@ -44,3 +44,6 @@ RUN apt-get update \
         novnc \
         websockify \
     && rm -rf /var/lib/apt/lists/*
+
+# Node and Playwright tooling are installed in post-create after
+# devcontainer features (including Node.js) are applied.

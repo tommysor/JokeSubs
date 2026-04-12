@@ -43,6 +43,41 @@ warmup_aspire_resources() {
   aspire stop --apphost "$APPHOST_PATH" --non-interactive --nologo
 }
 
+install_nodejs_playwright_browsers() {
+  if ! command -v npm >/dev/null 2>&1; then
+    echo "npm is unavailable; skipping Node.js Playwright browser install."
+    return
+  fi
+
+  echo "Installing Playwright browser binaries for Node.js MCP server..."
+  npx --yes playwright install chromium chrome
+}
+
+ensure_xvfb_running() {
+  if ! command -v Xvfb >/dev/null 2>&1; then
+    echo "Xvfb is unavailable; skipping virtual display setup."
+    return
+  fi
+
+  # Check if DISPLAY is already set to a valid Xvfb display
+  if [[ -n "${DISPLAY}" ]] && [[ "${DISPLAY}" == :* ]]; then
+    if ps aux | grep -q "[X]vfb ${DISPLAY#:}"; then
+      echo "Xvfb already running on ${DISPLAY}"
+      return
+    fi
+  fi
+
+  # Start Xvfb on display :99 if not already running
+  local display=":99"
+  if ! ps aux | grep -q "[X]vfb ${display#:}"; then
+    echo "Starting Xvfb on ${display}..."
+    Xvfb "$display" -screen 0 1920x1080x24 >/dev/null 2>&1 &
+    export DISPLAY="$display"
+    sleep 2
+    echo "Xvfb started on ${DISPLAY}"
+  fi
+}
+
 install_dotnet_playwright_browsers() {
   local tests_project="$ROOT_DIR/JokeSubs.AcceptanceTests/JokeSubs.AcceptanceTests.csproj"
   local playwright_ps1
@@ -77,6 +112,8 @@ if command -v npm >/dev/null 2>&1; then
 fi
 
 wait_for_docker_daemon
+ensure_xvfb_running
+install_nodejs_playwright_browsers
 install_dotnet_playwright_browsers
 warmup_aspire_resources
 
