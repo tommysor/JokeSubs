@@ -60,7 +60,7 @@ public sealed class AspireAssemblyFixture : IAsyncLifetime
         IAcceptanceAdapter adapter = kind switch
         {
             AdapterKind.Api => new Adapters.Api.ApiAcceptanceAdapter(this, _apiClient),
-            AdapterKind.Ui => await Adapters.Ui.PlaywrightAcceptanceAdapter.CreateAsync(this, _uiBaseUri.ToString()),
+            AdapterKind.Ui => await Adapters.Ui.PlaywrightAcceptanceAdapter.CreateAsync(_uiBaseUri.ToString()),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Only a single adapter kind is supported per test execution.")
         };
 

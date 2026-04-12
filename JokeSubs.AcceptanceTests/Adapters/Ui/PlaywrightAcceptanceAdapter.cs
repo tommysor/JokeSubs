@@ -9,15 +9,15 @@ namespace JokeSubs.AcceptanceTests.Adapters.Ui;
 /// </summary>
 public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
 {
-    private readonly string _baseUri;
     private readonly IPage _page;
+    private readonly IBrowserContext _context;
     private readonly IBrowser _browser;
     private readonly IPlaywright _playwrightInstance;
 
-    private PlaywrightAcceptanceAdapter(string baseUri, IPage page, IBrowser browser, IPlaywright playwright)
+    private PlaywrightAcceptanceAdapter(IPage page, IBrowserContext context, IBrowser browser, IPlaywright playwright)
     {
-        _baseUri = baseUri;
         _page = page;
+        _context = context;
         _browser = browser;
         _playwrightInstance = playwright;
     }
@@ -25,7 +25,7 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
     /// <summary>
     /// Factory method to create and initialize a Playwright adapter with a browser session.
     /// </summary>
-    public static async Task<PlaywrightAcceptanceAdapter> CreateAsync(AspireAssemblyFixture fixture, string baseUri)
+    public static async Task<PlaywrightAcceptanceAdapter> CreateAsync(string baseUri)
     {
         var playwright = await Playwright.CreateAsync();
 
@@ -34,10 +34,15 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
             Headless = true // Run in headless mode for CI/unattended execution
         });
 
-        var page = await browser.NewPageAsync();
-        await page.GotoAsync(baseUri);
+        var context = await browser.NewContextAsync(new BrowserNewContextOptions
+        {
+            BaseURL = baseUri
+        });
 
-        return new PlaywrightAcceptanceAdapter(baseUri, page, browser, playwright);
+        var page = await context.NewPageAsync();
+        await page.GotoAsync("/");
+
+        return new PlaywrightAcceptanceAdapter(page, context, browser, playwright);
     }
 
     public async Task<List<StoreItem>> GetStoresAsync()
@@ -152,7 +157,7 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
 
     public async Task<StoreItem?> OpenStoreAsync(string id)
     {
-        await _page.GotoAsync(_baseUri);
+        await _page.GotoAsync("/");
 
         // Scope lookup to visible store rows and click the row containing this store id.
         var storeRow = _page.Locator("a.list-row").Filter(new LocatorFilterOptions { HasTextString = id });
@@ -165,6 +170,7 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
     public async ValueTask DisposeAsync()
     {
         await _page.CloseAsync();
+        await _context.CloseAsync();
         await _browser.CloseAsync();
         _playwrightInstance.Dispose();
     }
