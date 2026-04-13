@@ -110,7 +110,64 @@ public class StoreAcceptanceSpecs
 
         await dsl.WhenAddingGroupToStoreAsync(uniqueId, "Monthly Members");
 
+        dsl.ThenGroupAdditionSucceededAsync();
         dsl.ThenStoreContainsGroupAsync("Monthly Members");
+    }
+
+    public static IEnumerable<object?[]> RejectsGroupAdditionWhenNameIsBlankData
+        => AddAllAdaptersAsFirstArg(
+        [
+            [""],
+            ["   "]
+        ]);
+
+    [Theory]
+    [MemberData(nameof(RejectsGroupAdditionWhenNameIsBlankData))]
+    public async Task RejectsGroupAdditionWhenNameIsBlank(AdapterKind adapterKind, string groupName)
+    {
+        var uniqueId = $"group-blank-{Guid.NewGuid():N}";
+        await using var dsl = await _fixture.GetStoreScenarioDsl(adapterKind);
+
+        await dsl.GivenStoresExistAsync((uniqueId, "Group Store"));
+
+        await dsl.WhenAddingGroupToStoreAsync(uniqueId, groupName);
+
+        dsl.ThenGroupAdditionFailedAsync();
+        dsl.ThenGroupValidationErrorExistsForFieldAsync("name", "Name is required.");
+    }
+
+    // ApiOnly because the UI does not allow submitting a null group name, but the API can receive it.
+    [Theory]
+    [MemberData(nameof(ApiOnlyData))]
+    public async Task RejectsGroupAdditionWhenNameIsNull(AdapterKind adapterKind)
+    {
+        var uniqueId = $"group-null-{Guid.NewGuid():N}";
+        await using var dsl = await _fixture.GetStoreScenarioDsl(adapterKind);
+
+        await dsl.GivenStoresExistAsync((uniqueId, "Group Store"));
+
+        await dsl.WhenAddingGroupToStoreAsync(uniqueId, null!);
+
+        dsl.ThenGroupAdditionFailedAsync();
+        dsl.ThenGroupValidationErrorExistsForFieldAsync("name", "Name is required.");
+    }
+
+    [Theory]
+    [MemberData(nameof(AllAdaptersData))]
+    public async Task RejectsGroupAdditionWhenNameIsDuplicate(AdapterKind adapterKind)
+    {
+        var uniqueId = $"group-dup-{Guid.NewGuid():N}";
+        await using var dsl = await _fixture.GetStoreScenarioDsl(adapterKind);
+
+        await dsl.GivenStoresExistAsync((uniqueId, "Group Store"));
+
+        await dsl.WhenAddingGroupToStoreAsync(uniqueId, "Members");
+        dsl.ThenGroupAdditionSucceededAsync();
+
+        await dsl.WhenAddingGroupToStoreAsync(uniqueId, "Members");
+
+        dsl.ThenGroupAdditionFailedAsync();
+        dsl.ThenGroupValidationErrorExistsForFieldAsync("name", "Group name must be unique within the store.");
     }
 
     public static IEnumerable<object?[]> RejectsStoreCreationWhenNameIsBlankData

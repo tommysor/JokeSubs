@@ -29,6 +29,16 @@ public record CreateStoreResult
 }
 
 /// <summary>
+/// Result of an add-group-to-store attempt.
+/// </summary>
+public record AddGroupResult
+{
+    public required StoreItem? Store { get; init; }
+    public required ValidationErrorResult? ValidationError { get; init; }
+    public required bool Success { get; init; }
+}
+
+/// <summary>
 /// Represents the contract for interacting with the SUT (System Under Test) via different transports.
 /// Implementations include HTTP API and Playwright UI adapters.
 /// </summary>
@@ -56,7 +66,7 @@ public interface IAcceptanceAdapter : IAsyncDisposable
     Task<StoreItem?> OpenStoreAsync(string id);
 
     /// <summary>
-    /// Adds a group to a store and returns the updated store details.
+    /// Adds a group to a store and returns the result, including any validation errors.
     /// </summary>
-    Task<StoreItem?> AddGroupToStoreAsync(string storeId, string groupName);
+    Task<AddGroupResult> AddGroupToStoreAsync(string storeId, string groupName);
 }
