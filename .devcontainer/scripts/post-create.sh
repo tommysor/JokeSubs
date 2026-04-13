@@ -60,9 +60,11 @@ ensure_xvfb_running() {
   fi
 
   # Check if DISPLAY is already set to a valid Xvfb display
-  if [[ -n "${DISPLAY}" ]] && [[ "${DISPLAY}" == :* ]]; then
-    if ps aux | grep -q "[X]vfb ${DISPLAY#:}"; then
-      echo "Xvfb already running on ${DISPLAY}"
+  local current_display="${DISPLAY:-}"
+
+  if [[ -n "$current_display" ]] && [[ "$current_display" == :* ]]; then
+    if ps aux | grep -q "[X]vfb ${current_display#:}"; then
+      echo "Xvfb already running on $current_display"
       return
     fi
   fi
