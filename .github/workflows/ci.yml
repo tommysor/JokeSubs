@@ -35,4 +35,4 @@ jobs:
               run: pwsh JokeSubs.AcceptanceTests/bin/Debug/net10.0/playwright.ps1 install chromium --with-deps
 
             - name: Run acceptance tests
-              run: dotnet test JokeSubs.AcceptanceTests --no-build --logger "github" --logger "console;verbosity=normal"
+              run: dotnet test JokeSubs.AcceptanceTests --no-build --logger "console;verbosity=normal"
