@@ -12,11 +12,11 @@ var server = builder.AddProject<Projects.JokeSubs_Server>("server")
     .WithHttpHealthCheck("/health")
     .WithExternalHttpEndpoints()
     .WithReference(storesContainer)
-    .WaitFor(cosmos);
+    .WaitFor(cosmos, WaitBehavior.WaitOnResourceUnavailable);
 
 var webfrontend = builder.AddViteApp("webfrontend", "../frontend")
     .WithReference(server)
-    .WaitFor(server);
+    .WaitFor(server, WaitBehavior.WaitOnResourceUnavailable);
 
 server.PublishWithContainerFiles(webfrontend, "wwwroot");
 
