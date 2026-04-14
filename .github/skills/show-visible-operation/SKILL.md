@@ -1,6 +1,6 @@
 ---
 name: show-visible-operation
-description: 'Show a user a live, visible browser automation in dev containers using Xvfb/noVNC and Playwright MCP or terminal Playwright fallback. Use when user says: show me live, visible browser, watch you do it, do operation in front of me, add location while I watch.'
+description: 'Show a user a live, visible browser automation in dev containers using noVNC and Playwright. Use when user says: show me live, visible browser, watch you do it, do operation in front of me, add location while I watch, demo in VS Code integrated browser.'
 argument-hint: 'Operation to demonstrate in UI, plus optional target value (for example: add location location-1717)'
 user-invocable: true
 ---
@@ -19,43 +19,45 @@ Demonstrate an operation live in a browser the user can watch.
 - Optional target value to create or modify (for example a location id).
 
 ## Procedure
-1. Confirm app readiness.
-- If apphost is not running, start it with aspire run.
-- Capture the current frontend endpoint from Aspire output or logs.
+1. Run one-command live demo prep.
+- Run `bash .devcontainer/scripts/prepare-live-demo.sh`.
+- This starts display services, validates MCP wrappers, starts Aspire with `aspire start --isolated`, and waits for `server` and `webfrontend`.
 
-2. Confirm display stack readiness.
-- Ensure Xvfb is running on display :99.
-- Ensure x11vnc and noVNC proxy are running.
-- Ensure port 6080 is listening.
+2. Open a visible browser surface in VS Code.
+- Open `http://localhost:6080/vnc.html` in the VS Code integrated browser.
+- If available, use the `open_browser_page` tool for this URL.
+- Tell the user this noVNC page is the live screen they should watch.
 
-3. Open user-visible noVNC view.
-- Open http://localhost:6080/vnc.html in the host browser.
-- Tell the user this is the window where actions will be visible.
+3. Open the app endpoint to be demonstrated.
+- Use the dashboard URL and frontend URL printed by `prepare-live-demo.sh`.
+- If needed, rediscover endpoints with `aspire describe --apphost JokeSubs.AppHost/JokeSubs.AppHost.csproj --format json`.
+- In the noVNC browser, navigate to the frontend endpoint.
 
-4. Attempt automation using Playwright MCP first.
-- Navigate to frontend endpoint.
-- Perform requested operation.
-- If MCP cannot run headed browser due to display/session mismatch, switch to fallback path.
+4. Perform the operation visibly.
+- Use Playwright MCP first.
+- Keep action pace human-visible (short delays between key steps).
+- Prefer visible selectors and labels; avoid brittle hidden-attribute coupling.
 
-5. Fallback path: terminal Playwright on DISPLAY=:99.
-- Ensure Playwright browser binaries are installed for the runtime being used.
-- Run a headed Playwright script with slow motion so the user can watch the flow.
-- Keep waits short but visible for confirmation.
-- If the fallback path is used, explicitly disclose this to the user and explain why.
+5. Fallback path if MCP cannot drive the demo reliably.
+- Run terminal Playwright headed on `DISPLAY=:99`.
+- Keep motion slow enough for user observation.
+- Explicitly disclose fallback usage and reason.
 
 6. Report result clearly.
 - State what was performed.
-- State where the user could see it.
-- State the visible behavior that was observed.
+- State where the user watched it (VS Code integrated noVNC page).
+- State what visible behavior occurred, including mismatches.
 
 ## Decision Points
-- If noVNC endpoint is down: start or restart display services, then retry.
-- If MCP Playwright fails with missing browser: install browser and retry.
-- If MCP Playwright fails with missing X server: use terminal Playwright fallback on DISPLAY=:99.
-- If frontend endpoint is unknown: infer from Aspire logs or probe known ports.
-- If the observed behavior differs from the expected behavior: keep the run visible and describe the mismatch instead of masking it.
+- If prep script fails: resolve the reported failing prerequisite first, then rerun prep.
+- If noVNC endpoint is down: rerun `bash .devcontainer/scripts/start-display.sh` and `bash .devcontainer/scripts/check-mcp.sh`.
+- If MCP Playwright fails with missing browser: run `npx --yes playwright install chromium chrome` and retry.
+- If MCP Playwright fails with X/display/session issues: use terminal fallback on `DISPLAY=:99`.
+- If frontend endpoint is unknown: open Aspire dashboard and use the `webfrontend` endpoint there.
+- If the observed behavior differs from expected: keep the run visible and describe the mismatch.
 
 ## Quality Checks
+- `bash .devcontainer/scripts/prepare-live-demo.sh` succeeds before automation.
 - noVNC page is reachable before starting automation.
 - The user is told exactly where to watch.
 - Operation is visible at human speed, not instant headless execution.

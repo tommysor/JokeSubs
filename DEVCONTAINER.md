@@ -18,14 +18,46 @@ bash .devcontainer/scripts/check-mcp.sh
 1. Start the app model:
 
 ```bash
-aspire run
+aspire start --isolated
 ```
 
 2. Use MCP tools after preflight passes:
    - Aspire MCP wrapper: `.devcontainer/scripts/mcp-aspire.sh`
    - Playwright MCP wrapper: `.devcontainer/scripts/mcp-playwright.sh`
 
-3. If `JokeSubs.AppHost/AppHost.cs` changes, restart Aspire.
+3. If `JokeSubs.AppHost/AppHost.cs` changes, run `aspire start --isolated` again.
+
+## Live demo workflow (VS Code integrated browser)
+
+Use this flow when you need to visibly demonstrate actions to the user.
+
+1. Run one prep command:
+
+```bash
+bash .devcontainer/scripts/prepare-live-demo.sh
+```
+
+2. Open the VS Code integrated browser to:
+   - `http://localhost:6080/vnc.html` (live noVNC screen)
+   - Aspire dashboard URL printed by `prepare-live-demo.sh` (dynamic under `--isolated`)
+   - Web frontend URL printed by `prepare-live-demo.sh`
+
+3. If you need to rediscover endpoints, run:
+
+```bash
+aspire describe --apphost JokeSubs.AppHost/JokeSubs.AppHost.csproj --format json
+```
+
+4. Perform the operation through Playwright MCP. The user watches it live in noVNC.
+
+### What the prep command does
+
+- Starts/reuses Xvfb, x11vnc, and noVNC display services.
+- Verifies noVNC is reachable on port `6080`.
+- Runs MCP wrapper health checks.
+- Starts AppHost with `aspire start --isolated`.
+- Waits for `server` and `webfrontend` to become ready.
+- Prints the active Aspire dashboard URL and webfrontend URL for the current run.
 
 ## MCP reliability guardrails
 
@@ -65,6 +97,17 @@ aspire --version
 npx -y @playwright/mcp --help
 ```
 
+### noVNC page does not open
+
+Run:
+
+```bash
+bash .devcontainer/scripts/start-display.sh
+bash .devcontainer/scripts/check-mcp.sh
+```
+
+Then reload `http://localhost:6080/vnc.html` in the VS Code integrated browser.
+
 ### Aspire resources seem stale
 
-Stop and restart `aspire run`. App model changes in `JokeSubs.AppHost/AppHost.cs` require restart.
+Run `aspire start --isolated` again. App model changes in `JokeSubs.AppHost/AppHost.cs` require restart.
