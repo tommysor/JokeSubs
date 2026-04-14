@@ -31,6 +31,9 @@ jobs:
             - name: Build acceptance tests
               run: dotnet build JokeSubs.AcceptanceTests --no-restore
 
+            - name: Generate HTTPS developer certificate
+              run: dotnet dev-certs https
+
             - name: Install Playwright browsers
               run: pwsh JokeSubs.AcceptanceTests/bin/Debug/net10.0/playwright.ps1 install chromium --with-deps
 
