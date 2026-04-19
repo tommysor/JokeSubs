@@ -11,6 +11,7 @@ public class StoreScenarioDsl : IAsyncDisposable
     private readonly IAcceptanceAdapter _adapter;
     private List<StoreItem>? _currentStores;
     private CreateStoreResult? _lastCreateResult;
+    private AddGroupResult? _lastAddGroupResult;
     private StoreItem? _selectedStore;
 
     public StoreScenarioDsl(IAcceptanceAdapter adapter)
@@ -48,7 +49,8 @@ public class StoreScenarioDsl : IAsyncDisposable
 
     public async Task WhenAddingGroupToStoreAsync(string id, string groupName)
     {
-        _selectedStore = await _adapter.AddGroupToStoreAsync(id, groupName);
+        _lastAddGroupResult = await _adapter.AddGroupToStoreAsync(id, groupName);
+        _selectedStore = _lastAddGroupResult.Store;
     }
 
     // ==================== THEN ====================
@@ -75,6 +77,26 @@ public class StoreScenarioDsl : IAsyncDisposable
         {
             throw new AssertionException(
                 "Store creation succeeded when it was expected to fail");
+        }
+    }
+
+    public void ThenGroupAdditionSucceededAsync()
+    {
+        if (_lastAddGroupResult?.Success != true)
+        {
+            var errorMsg = _lastAddGroupResult?.ValidationError?.Title
+                ?? "Unknown error";
+            throw new AssertionException(
+                $"Group addition failed: {errorMsg}");
+        }
+    }
+
+    public void ThenGroupAdditionFailedAsync()
+    {
+        if (_lastAddGroupResult?.Success == true)
+        {
+            throw new AssertionException(
+                "Group addition succeeded when it was expected to fail");
         }
     }
 
@@ -156,6 +178,29 @@ public class StoreScenarioDsl : IAsyncDisposable
         {
             throw new AssertionException(
                 $"Expected validation error '{expectedMessage}' but got '{message}'");
+        }
+    }
+
+    public void ThenGroupValidationErrorExistsForFieldAsync(string fieldName, string expectedMessage)
+    {
+        if (_lastAddGroupResult?.ValidationError?.Errors == null)
+        {
+            throw new AssertionException(
+                $"Expected group validation error for field '{fieldName}' but no validation errors were returned");
+        }
+
+        var fieldKey = char.ToUpper(fieldName[0]) + fieldName.Substring(1);
+        if (!_lastAddGroupResult.ValidationError.Errors.TryGetValue(fieldKey, out var messages))
+        {
+            throw new AssertionException(
+                $"Expected group validation error for field '{fieldName}' but no errors were found for that field");
+        }
+
+        var message = messages.FirstOrDefault();
+        if (message != expectedMessage)
+        {
+            throw new AssertionException(
+                $"Expected group validation error '{expectedMessage}' but got '{message}'");
         }
     }
 

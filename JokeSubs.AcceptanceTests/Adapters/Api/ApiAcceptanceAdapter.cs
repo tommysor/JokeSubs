@@ -94,21 +94,38 @@ public class ApiAcceptanceAdapter : IAcceptanceAdapter
             ?? throw new InvalidOperationException("Failed to deserialize store from API response");
     }
 
-    public async Task<StoreItem?> AddGroupToStoreAsync(string storeId, string groupName)
+    public async Task<AddGroupResult> AddGroupToStoreAsync(string storeId, string groupName)
     {
         var payload = new { name = groupName };
         var response = await _client.PostAsJsonAsync($"/api/stores/{Uri.EscapeDataString(storeId)}/groups", payload);
 
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
-            return null;
+            return new AddGroupResult { Store = null, ValidationError = null, Success = false };
         }
 
-        response.EnsureSuccessStatusCode();
+        // 200 OK: group added successfully
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            var store = JsonSerializer.Deserialize<StoreItem>(content, JsonOptions)
+                ?? throw new InvalidOperationException("Failed to deserialize updated store from API response");
+            return new AddGroupResult { Store = store, ValidationError = null, Success = true };
+        }
 
-        var content = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<StoreItem>(content, JsonOptions)
-            ?? throw new InvalidOperationException("Failed to deserialize updated store from API response");
+        // 400 Bad Request: validation error
+        if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            var error = JsonSerializer.Deserialize<ValidationErrorResult>(content, JsonOptions)
+                ?? new ValidationErrorResult(null, new Dictionary<string, string[]>());
+            return new AddGroupResult { Store = null, ValidationError = error, Success = false };
+        }
+
+        // Any other response code is a hard failure
+        throw new HttpRequestException(
+            $"Unexpected response from Add Store Group endpoint: {response.StatusCode}. " +
+            $"Body: {await response.Content.ReadAsStringAsync()}");
     }
 
     public ValueTask DisposeAsync()

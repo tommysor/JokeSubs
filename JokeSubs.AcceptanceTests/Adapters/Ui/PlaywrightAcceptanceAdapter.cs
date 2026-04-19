@@ -167,7 +167,7 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
         return await ReadSelectedStoreAsync();
     }
 
-    public async Task<StoreItem?> AddGroupToStoreAsync(string storeId, string groupName)
+    public async Task<AddGroupResult> AddGroupToStoreAsync(string storeId, string groupName)
     {
         await _page.GotoAsync($"/stores/{Uri.EscapeDataString(storeId)}");
         await _page.WaitForLoadStateAsync(LoadState.NetworkIdle);
@@ -176,7 +176,33 @@ public class PlaywrightAcceptanceAdapter : IAcceptanceAdapter
         await _page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Add group" }).ClickAsync();
         await _page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
-        return await ReadSelectedStoreAsync();
+        // Check for validation errors shown by the UI
+        var groupNameErrorEl = await _page.QuerySelectorAsync("#group-name-error");
+        var submitErrorEl = await _page.QuerySelectorAsync(".banner-error");
+
+        if (groupNameErrorEl != null || submitErrorEl != null)
+        {
+            var errors = new Dictionary<string, string[]>();
+            var nameError = groupNameErrorEl != null ? await groupNameErrorEl.TextContentAsync() : null;
+            if (!string.IsNullOrEmpty(nameError))
+                errors["Name"] = [nameError];
+
+            var submitErrorText = submitErrorEl != null ? await submitErrorEl.TextContentAsync() : null;
+            return new AddGroupResult
+            {
+                Store = null,
+                ValidationError = new ValidationErrorResult(submitErrorText, errors),
+                Success = false
+            };
+        }
+
+        var store = await ReadSelectedStoreAsync();
+        return new AddGroupResult
+        {
+            Store = store,
+            ValidationError = null,
+            Success = store != null
+        };
     }
 
     public async ValueTask DisposeAsync()
