@@ -1,0 +1,54 @@
+name: CI
+
+on:
+    push:
+        branches:
+            - main
+            - "copilot/**"
+    pull_request:
+
+jobs:
+    acceptance-tests:
+        runs-on: ubuntu-latest
+
+        permissions:
+            contents: read
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: "10.0.x"
+
+            - name: Pre-pull Cosmos DB emulator image
+              run: docker pull mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview
+
+            - name: Restore dependencies
+              run: dotnet restore
+
+            - name: Build acceptance tests
+              run: dotnet build JokeSubs.AcceptanceTests --no-restore
+
+            - name: Generate HTTPS developer certificate
+              run: dotnet dev-certs https
+
+            - name: Install Playwright browsers
+              run: pwsh JokeSubs.AcceptanceTests/bin/Debug/net10.0/playwright.ps1 install chromium --with-deps
+
+            - name: Install frontend dependencies
+              run: npm ci --prefix frontend
+
+            - name: Run acceptance tests
+              env:
+                  ASPIRE_ALLOW_UNSECURED_TRANSPORT: "true"
+              run: dotnet test JokeSubs.AcceptanceTests --no-build --logger "console;verbosity=normal"
+
+            - name: Capture Docker logs on failure
+              if: failure()
+              run: |
+                  echo "=== Docker container status ==="
+                  docker ps -a
+                  echo "=== Cosmos emulator logs ==="
+                  docker logs $(docker ps -aq --filter "ancestor=mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview" | head -1) 2>&1 || true
