@@ -62,6 +62,7 @@ aspire describe --apphost JokeSubs.AppHost/JokeSubs.AppHost.csproj --format json
 ## MCP reliability guardrails
 
 - MCP commands are pinned to wrapper scripts from `.vscode/mcp.json`.
+- MCP commands use `${workspaceFolder}` so cloned folder names on different PCs still resolve correctly inside the container.
 - Wrappers verify command availability before startup.
 - A shared preflight script detects command/path drift after container create/reopen.
 - Playwright MCP wrapper falls back to `npx -y @playwright/mcp` if the global binary is unavailable.
