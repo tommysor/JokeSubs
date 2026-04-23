@@ -2,13 +2,13 @@
   "servers": {
     "aspire": {
       "type": "stdio",
-      "command": "/workspaces/JokeSubs/.devcontainer/scripts/mcp-aspire.sh",
+      "command": "${workspaceFolder}/.devcontainer/scripts/mcp-aspire.sh",
       "args": [
       ]
     },
     "playwright": {
       "type": "stdio",
-      "command": "/workspaces/JokeSubs/.devcontainer/scripts/mcp-playwright.sh",
+      "command": "${workspaceFolder}/.devcontainer/scripts/mcp-playwright.sh",
       "args": [
         "--ignore-https-errors"
       ]
