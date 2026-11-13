@@ -68,6 +68,10 @@ aspire describe --apphost JokeSubs.AppHost/JokeSubs.AppHost.csproj --format json
 
 ## Troubleshooting
 
+### Docker daemon does not become ready
+
+The dev container uses its own Docker-in-Docker daemon, even when the host uses Podman and `podman-docker`. The post-create and post-start checks start the nested daemon if the feature's startup retries leave it stopped. If it still fails, inspect the reported Docker diagnostics and `/tmp/dockerd.log` inside the dev container. Docker-in-Docker requires the container to run with the privileges supplied by the feature.
+
 ### MCP preflight fails
 
 Run:

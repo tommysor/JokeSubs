@@ -2,7 +2,7 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
 var cosmos = builder.AddAzureCosmosDB("cosmos")
-    .RunAsPreviewEmulator(emulator => emulator
+    .RunAsEmulator(emulator => emulator
         .WithDataExplorer()
         .WithLifetime(ContainerLifetime.Persistent));
 
