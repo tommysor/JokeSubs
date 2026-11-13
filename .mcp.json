@@ -1,0 +1,22 @@
+{
+	"mcpServers": {
+		"aspire": {
+			"type": "stdio",
+			"command": "/workspaces/JokeSubs/.devcontainer/scripts/mcp-aspire.sh",
+			"args": [],
+			"tools": [
+				"*"
+			]
+		},
+		"playwright": {
+			"type": "stdio",
+			"command": "/workspaces/JokeSubs/.devcontainer/scripts/mcp-playwright.sh",
+			"args": [
+				"--ignore-https-errors"
+			],
+			"tools": [
+				"*"
+			]
+		}
+	}
+}
