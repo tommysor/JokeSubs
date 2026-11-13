@@ -4,7 +4,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 var cosmos = builder.AddAzureCosmosDB("cosmos")
     .RunAsEmulator(emulator => emulator
         .WithDataExplorer()
-        .WithLifetime(ContainerLifetime.Persistent));
+        .WithLifetime(ContainerLifetime.Session));
 
 var db = cosmos.AddCosmosDatabase("jokesubs");
 var storesContainer = db.AddContainer("stores", "/id");
