@@ -1,5 +1,6 @@
 {
     "chat.tools.terminal.autoApprove": {
+        "aspire --version": true,
         "aspire describe": true,
         "aspire run": true,
         "docker info": true,
@@ -11,12 +12,15 @@
         "dotnet package": true,
         "dotnet restore": true,
         "dotnet test": true,
+        "dotnet tool list": true,
+        "dotnet tool search": true,
         "jq": true,
         "node --version": true,
         "npm --version": true,
         "npm audit": true,
         "npm run build": true,
         "npm run lint": true,
+        "rg": true,
         "set": true,
         "tail": true,
         "/^npm --prefix frontend run build$/": {
