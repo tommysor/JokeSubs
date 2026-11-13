@@ -3,6 +3,7 @@
         "aspire --version": true,
         "aspire describe": true,
         "aspire run": true,
+        "aspire start": true,
         "docker info": true,
         "docker ps": true,
         "dotnet --version": true,
@@ -22,6 +23,7 @@
         "npm run lint": true,
         "rg": true,
         "set": true,
+        "sleep": true,
         "tail": true,
         "/^npm --prefix frontend run build$/": {
             "approve": true,
