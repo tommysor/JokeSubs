@@ -19,6 +19,7 @@
         "node --version": true,
         "npm --version": true,
         "npm audit": true,
+        "npm outdated": true,
         "npm run build": true,
         "npm run lint": true,
         "rg": true,
